@@ -15,5 +15,5 @@ int main()
 
 double MyFunction(double input)
 {
-    return (std::pow(input, 3) + 5);
+    return (std::pow(input, 3) + 5.0);
 }

@@ -26,10 +26,6 @@ public:
                double init_precision, unsigned int init_max_iter);
     virtual ~RootFinder() = default;
 
-    // // computational
-    // virtual double find_root(double guess) = 0;
-    // virtual double find_root(double left_guess, double right_guess) = 0;
-
     // accessors and mutators
     double get_root();
     void reset();

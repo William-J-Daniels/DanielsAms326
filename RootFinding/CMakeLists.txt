@@ -13,6 +13,8 @@ add_library(${PROJECT_NAME} SHARED
   src/newtonraphson.cpp
   include/secant.h
   src/secant.cpp
+  include/fixedpoint.h
+  src/fixedpoint.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Differentiation)
@@ -30,6 +32,7 @@ set(public_headers
   include/bisection.h
   include/newtonraphson.h
   include/secant.h
+  include/fixedpoint.h
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER
   "${public_headers}"
@@ -43,3 +46,6 @@ target_link_libraries(newton_example PUBLIC ${PROJECT_NAME})
 
 add_executable(secant_example examples/secant_example.cpp)
 target_link_libraries(secant_example PUBLIC ${PROJECT_NAME})
+
+add_executable(fixed_point_example examples/fixed_point_example.cpp)
+target_link_libraries(fixed_point_example PUBLIC ${PROJECT_NAME})
