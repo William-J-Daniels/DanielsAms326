@@ -119,7 +119,9 @@ double NewtonRaphson::find_root(double guess)
         {
             previous = root;
             root = previous - (Function(previous)/AnalyticDerivative(previous));
-        } while (std::abs(root - previous) > precision);
+            num_iter = num_iter + 1;
+        } while (std::abs(root - previous) > precision && num_iter < max_iter);
+        root_found = true;
         return root;
     }
 
@@ -128,6 +130,8 @@ double NewtonRaphson::find_root(double guess)
         previous = root;
         root = previous -
                (Function(previous)/NumericalDerivative.evaluate(previous));
-    } while (std::abs(root - previous) > precision);
+        num_iter = num_iter + 1;
+    } while (std::abs(root - previous) > precision && num_iter < max_iter);
+    root_found = true;
     return root;
 }

@@ -24,9 +24,11 @@ public:
                unsigned int init_max_iter, double init_precision);
     RootFinder(std::function<double(double)> init_Func,
                double init_precision, unsigned int init_max_iter);
+    virtual ~RootFinder() = default;
 
-    // computational
-    double find_root();
+    // // computational
+    // virtual double find_root(double guess) = 0;
+    // virtual double find_root(double left_guess, double right_guess) = 0;
 
     // accessors and mutators
     double get_root();

@@ -10,7 +10,7 @@ class NewtonRaphson : RootFinder
 {
 public:
     // constructors
-    NewtonRaphson() = delete;
+    NewtonRaphson() = default;
     // analytic derivative
     NewtonRaphson(std::function<double(double)> init_Func,
                   std::function<double(double)> init_AnalyticDerivative);

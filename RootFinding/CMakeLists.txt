@@ -11,6 +11,8 @@ add_library(${PROJECT_NAME} SHARED
   src/bisection.cpp
   include/newtonraphson.h
   src/newtonraphson.cpp
+  include/secant.h
+  src/secant.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Differentiation)
@@ -27,6 +29,7 @@ set(public_headers
   include/rootfinder.h
   include/bisection.h
   include/newtonraphson.h
+  include/secant.h
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER
   "${public_headers}"
@@ -37,3 +40,6 @@ target_link_libraries(bisection_example PUBLIC ${PROJECT_NAME})
 
 add_executable(newton_example examples/newton_example.cpp)
 target_link_libraries(newton_example PUBLIC ${PROJECT_NAME})
+
+add_executable(secant_example examples/secant_example.cpp)
+target_link_libraries(secant_example PUBLIC ${PROJECT_NAME})

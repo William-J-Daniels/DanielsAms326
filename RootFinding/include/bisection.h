@@ -11,7 +11,7 @@ class Bisection : public RootFinder
     // Stops upon convergence or after a user-specified number of iterations.
 public:
     // constructors
-    Bisection() = delete;
+    Bisection() = default;
     Bisection(std::function<double(double)> init_Func);
     Bisection(std::function<double(double)> init_Func,
               unsigned int init_max_iter);

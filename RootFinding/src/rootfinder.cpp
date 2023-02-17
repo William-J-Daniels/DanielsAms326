@@ -46,15 +46,6 @@ RootFinder::RootFinder(std::function<double(double)> init_Func,
     max_iter = init_max_iter;
 }
 
-// computational
-
-double RootFinder::find_root()
-{
-    std::cerr << "find_root() not defined. RootFinder is an abtract class not "
-              << "intended for direct use in programs" << std::endl;
-    exit(EXIT_FAILURE);
-}
-
 // accessors and mutators
 
 double RootFinder::get_root()
