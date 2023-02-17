@@ -9,13 +9,14 @@ double AnalyticDerivative(double input);
 int main()
 {
     auto Dsin = diff::FirstDerivative(MyFunction);
-    double evaluation_point = 0.1; // radians
+    double evaluation_point = 0; // radians
 
-    for (int i = 1; i < 11; i++)
-    {
-        std::cout << Dsin.evaluate(evaluation_point, std::pow(0.5, i)) -
-                     AnalyticDerivative(evaluation_point) << std::endl;
-    }
+    // for (int i = 1; i < 11; i++)
+    // {
+    //     std::cout << Dsin.evaluate(evaluation_point, std::pow(0.5, i)) -
+    //                  AnalyticDerivative(evaluation_point) << std::endl;
+    // }
+    std::cout << Dsin.evaluate(M_PI/4);
 
     return 0;
 }
@@ -28,5 +29,5 @@ double MyFunction(double input)
 
 double AnalyticDerivative(double input)
 {
-    return -std::sin(input);
+    return std::cos(input);
 }

@@ -5,11 +5,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(root_finding VERSION 0.1.0)
 
 add_library(${PROJECT_NAME} SHARED
+  include/rootfinder.h
+  src/rootfinder.cpp
   include/bisection.h
   src/bisection.cpp
   include/newtonraphson.h
   src/newtonraphson.cpp
 )
+
+target_link_libraries(${PROJECT_NAME} PUBLIC Differentiation)
 
 target_include_directories(${PROJECT_NAME}
   PRIVATE
@@ -20,6 +24,7 @@ target_include_directories(${PROJECT_NAME}
 )
 
 set(public_headers
+  include/rootfinder.h
   include/bisection.h
   include/newtonraphson.h
 )
@@ -29,3 +34,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER
 
 add_executable(bisection_example examples/bisection_example.cpp)
 target_link_libraries(bisection_example PUBLIC ${PROJECT_NAME})
+
+add_executable(newton_example examples/newton_example.cpp)
+target_link_libraries(newton_example PUBLIC ${PROJECT_NAME})

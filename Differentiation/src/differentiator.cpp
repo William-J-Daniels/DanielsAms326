@@ -4,11 +4,6 @@ using namespace diff;
 
 // constructors
 
-Differentiator::Differentiator()
-{
-    // intentionally left blank
-}
-
 Differentiator::Differentiator(std::function<double(double)> init_Function)
 {
     Function = init_Function;
@@ -16,13 +11,6 @@ Differentiator::Differentiator(std::function<double(double)> init_Function)
 
 // solvers
 // using time step
-
-double Differentiator::evaluate(double location)
-{
-    std::cerr << "Differentiator is an abstract class not intneded for direct "
-              << "use in programs." << std::endl;
-    exit(EXIT_FAILURE);
-}
 
 double Differentiator::evaluate(double location, double new_step_size)
 {
@@ -43,7 +31,6 @@ double Differentiator::converge(double location)
         last_result = result;
         step_size = step_size / 2.0;
         result = evaluate(location);
-        std::cout << result << std::endl;
     } while (std::abs(result - last_result) > precision);
     return result;
 }
@@ -53,6 +40,7 @@ double Differentiator::converge(double location, double new_precision)
     precision = new_precision;
     return converge(location);
 }
+
 // mutators
 
 double Differentiator::get_deriv()

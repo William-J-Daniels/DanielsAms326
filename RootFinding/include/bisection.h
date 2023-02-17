@@ -1,15 +1,11 @@
-#ifndef BISECTION_H
-#define BISECTION_H
+#ifndef ROOTFINDER_BISECTION_H
+#define ROOTFINDER_BISECTION_H
 
-#include <functional>
-#include <cassert>
-#include <limits>
-#include <cstdlib>
-#include <iostream>
+#include <rootfinder.h>
 
 namespace roots{
 
-class Bisection
+class Bisection : public RootFinder
 {
     // A root-finding class that uses the bisection method to approximate roots.
     // Stops upon convergence or after a user-specified number of iterations.
@@ -29,19 +25,10 @@ public:
     // computational
     double find_root(double left_guess, double right_guess);
 
-    // accessors and mutators
-    double get_root();
-    void reset();
-
 private:
-    std::function<double(double)> Function;
-    double root;
-    bool root_found = false;
-    double precision = 1.0e-12;
-    unsigned int num_iter = 0;
-    unsigned int max_iter = std::numeric_limits<unsigned int>::max();
+    // intentionally blank
 };
 
 } // namespace roots
 
-#endif // BISECTION_H
+#endif // ROOTFINDER_BISECTION_H

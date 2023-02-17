@@ -15,6 +15,6 @@ double FirstDerivative::evaluate(double location)
          Function(location - step_size)
         )
         /
-        2.0 * step_size
+        (2.0 * step_size)
     );
 }

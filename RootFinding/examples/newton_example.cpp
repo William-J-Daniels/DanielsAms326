@@ -1,18 +1,18 @@
-#include <bisection.h>
+#include <newtonraphson.h>
 #include <cmath>
 
 double MyFunc(double input);
 
 int main()
 {
-    auto Test = roots::Bisection(MyFunc);
+    auto Test = roots::NewtonRaphson(MyFunc);
 
-    std::cout << Test.find_root(3.1415, 10.0) << std::endl;
+    std::cout << Test.find_root(3.1415) << std::endl;
 
     return 0;
 }
 
 double MyFunc(double input)
 {
-    return input - 5.4;
+    return (std::pow(input-5.4, 2));
 }

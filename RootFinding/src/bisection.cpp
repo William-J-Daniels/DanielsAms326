@@ -69,20 +69,3 @@ double Bisection::find_root(double left_guess, double right_guess)
     root_found = true;
     return root;
 }
-
-// accessors and mutators
-
-double Bisection::get_root()
-{
-    assert(root_found);
-    return root;
-
-}
-
-void Bisection::reset()
-{
-    root_found = false;
-    precision = 1.0e-12;
-    num_iter = 0;
-    max_iter = std::numeric_limits<unsigned int>::infinity();
-}

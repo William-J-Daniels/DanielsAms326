@@ -12,12 +12,13 @@ class Differentiator
 {
     // abstract class for first and second order numerical differentiation
 public:
-    // can construct defaultly or by passing the function
-    Differentiator();
+    // constructors and destructors
+    Differentiator() = default;
     Differentiator(std::function<double(double)> init_Function);
+    virtual ~Differentiator() = default;
 
     // solvers
-    double evaluate(double location);
+    virtual double evaluate(double location) = 0;
     double evaluate(double location, double new_step_size);
     double converge(double location);
     double converge(double location, double new_precision);
@@ -28,12 +29,12 @@ public:
 
 protected:
     std::function<double(double)> Function; // function to be differentiated
-    double step_size = 1.0e-6; // default initail step size
+    double step_size = 1.0e-8; // default initail step size
     double precision = 1.0e-12; // precision attempted to converge to
     double result; // the approximated derivative
     bool deriv_found = false;
 };
 
-} // namespace will
+} // namespace diff
 
 #endif // DIFFERENTIATOR_H
