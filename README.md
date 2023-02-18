@@ -5,7 +5,7 @@ submission, I will record the commit which corresponds to my final commit before
 the deadline. This will be much easier than trying to get all of the relevant
 files on brightspace or google dirve.
 
-Directory structure:
+# Directory structure:
 The directory structure is informed by the build system, cmake. Cmake makes it
 easy to have modular libraries that can be linked to other sub-projects within
 the master project by way of the include_subdirectory function. My libraries
@@ -23,7 +23,7 @@ corresponding to the location of the source. For example, to run the executable
 genarated by HomeworkOne/examples/problem_one.cpp, go to build/HomeworkOne and
 run ./problem_one.cpp
 
-Build instructions:
+# Build instructions:
 Clone the repository and change into it. Then, create a new build directory,
 change into it, run cmake a directory up, and run make.
 On linux, this corresponds to
