@@ -12,5 +12,6 @@ add_subdirectory(RootFinding)
 #add_subdirectory(Interpolation)
 
 # homeworks
+add_subdirectory(HomeworkOne/)
 
 # exams

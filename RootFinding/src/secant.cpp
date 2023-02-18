@@ -59,6 +59,7 @@ double Secant::find_root(double left_guess, double right_guess)
 
         root = previous - (Function(previous) * (previous - elder)) /
                (Function(previous) - Function(elder));
+        num_iter = num_iter + 1;
     } while (std::abs(root - previous) > precision);
 
     root_found = true;

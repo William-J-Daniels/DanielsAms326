@@ -6,7 +6,7 @@
 
 namespace roots {
 
-class NewtonRaphson : RootFinder
+class NewtonRaphson : public RootFinder
 {
 public:
     // constructors

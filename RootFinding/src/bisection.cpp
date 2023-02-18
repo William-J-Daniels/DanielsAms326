@@ -64,7 +64,6 @@ double Bisection::find_root(double left_guess, double right_guess)
             left_guess = root;
 
         num_iter = num_iter + 1;
-        std::cout << root << std::endl;
     }
     root_found = true;
     return root;

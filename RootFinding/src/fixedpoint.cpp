@@ -47,7 +47,7 @@ FixedPoint::FixedPoint(std::function<double(double)> init_Func,
 
 double FixedPoint::find_root(double guess)
 {
-    double previous;
+    double previous = guess;
 
     do
     {

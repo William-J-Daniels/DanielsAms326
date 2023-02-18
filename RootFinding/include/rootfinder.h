@@ -28,6 +28,7 @@ public:
 
     // accessors and mutators
     double get_root();
+    unsigned int get_num_iter();
     void reset();
 
 protected:

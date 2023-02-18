@@ -52,7 +52,12 @@ double RootFinder::get_root()
 {
     assert(root_found);
     return root;
+}
 
+unsigned int RootFinder::get_num_iter()
+{
+    assert(root_found);
+    return num_iter;
 }
 
 void RootFinder::reset()
