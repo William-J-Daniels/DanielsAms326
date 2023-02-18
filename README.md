@@ -27,5 +27,5 @@ run ./problem_one.cpp
 Clone the repository and change into it. Then, create a new build directory,
 change into it, run cmake a directory up, and run make.
 On linux, this corresponds to
-git clone git@github.com:William-J-Daniels/DanielsAms326
+git clone git@github.com:William-J-Daniels/DanielsAms326.git
 mkdir build && cd build && cmake .. && make
