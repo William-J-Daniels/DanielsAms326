@@ -16,7 +16,6 @@ add_library(${PROJECT_NAME} SHARED
   include/fixedpoint.h
   src/fixedpoint.cpp
 )
-
 target_link_libraries(${PROJECT_NAME} PUBLIC Differentiation)
 
 target_include_directories(${PROJECT_NAME}
