@@ -7,6 +7,7 @@
 #include <list>
 #include <cassert>
 #include <iostream>
+#include <algorithm>
 
 namespace interp {
 
@@ -18,6 +19,7 @@ public:
     PolynomialInterpolator() = default;
     PolynomialInterpolator(T init_xVals,  // accepts std iteratables
                            U init_yVals); // (vector, array, list)
+    // input list are assumed to be sorted from low to high xVals
     virtual ~PolynomialInterpolator() = default;
 
     // computational
@@ -30,7 +32,7 @@ public:
 protected:
     T xVals;
     U yVals;
-    virtual double Function(double input) = 0;
+    virtual double Function(std::vector<double> input) = 0;
     la::Matrix<double> Coefficients;
 
 private:
@@ -61,7 +63,6 @@ la::Matrix<double> PolynomialInterpolator<T, U>::get_coefficients()
 {
     return Coefficients;
 }
-
 
 }
 

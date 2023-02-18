@@ -14,7 +14,7 @@ public:
     void find_coefficients() override;
 
 private:
-    double Function(double input) override;
+    double Function(std::vector<double> input) override;
 };
 
 // header and implimentation cannot be separated in usual way with class
@@ -24,14 +24,24 @@ template <class T, class U>
 void Linear<T, U>::find_coefficients()
 {
     this->Coefficients = la::Matrix<double>(2, this->xVals.size() - 1);
-    // need 2 coefficients for a line
+    // need points-1 sets of 2 coefficients for a line
+    // row 0 is slope row 1 is intercept
+
+    for (auto [x, y] = std::tuple{this->xVals.begin(), this->yVals.end()};)
+    {
+        //
+    }
+
+    // transform is probably the best option, but im out of time to impliment it properly
+    // std::transform(this->xVals.begin(), this->xVals.end(), // defines range
+    //                this->yVals.begin()), // the other data; we know ranges are =
+    //                this->Coefficients.begin());
 }
 
 template <class T, class U>
-double Linear<T, U>::Function(double input)
+double Linear<T, U>::Function(std::vector<double> input)
 {
-    std::cerr << "another oopsie" << std::endl;
-    exit(EXIT_FAILURE);
+    return 0;
 }
 
 } // namespace interp

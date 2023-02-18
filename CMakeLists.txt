@@ -9,7 +9,7 @@ add_subdirectory(RandomNumbers)
 add_subdirectory(LinearAlgebra)
 add_subdirectory(Differentiation)
 add_subdirectory(RootFinding)
-add_subdirectory(Interpolation)
+#add_subdirectory(Interpolation)
 
 # homeworks
 

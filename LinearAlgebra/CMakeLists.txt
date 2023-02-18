@@ -21,3 +21,6 @@ set(public_headers
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEARER "${public_headers}")
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+add_executable(matrix_testing examples/matrix_testing.cpp)
+target_link_libraries(matrix_testing PUBLIC ${PROJECT_NAME})
