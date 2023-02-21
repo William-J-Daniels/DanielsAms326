@@ -7,6 +7,7 @@ project(LinearAlgebra VERSION 1.0.0)
 add_library(${PROJECT_NAME} SHARED
   include/matrix.h
 )
+#target_link_libraries(${PROJECT_NAME} PUBLIC ParallelComputing)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE

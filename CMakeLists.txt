@@ -6,12 +6,13 @@ project(AMS326 VERSION 1.0.0)
 
 # libraries (roughly corresponds to lectures)
 add_subdirectory(RandomNumbers)
+#add_subdirectory(ParallelComputing)
 add_subdirectory(LinearAlgebra)
 add_subdirectory(Differentiation)
 add_subdirectory(RootFinding)
 #add_subdirectory(Interpolation)
 
 # homeworks
-add_subdirectory(HomeworkOne/)
+add_subdirectory(HomeworkOne)
 
 # exams

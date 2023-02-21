@@ -8,5 +8,5 @@ int main()
                         MyY = {3, 2, 1, 0};
 
     auto Test = interp::Linear<std::vector<double>, std::vector<double>>(MyX, MyY);
-    Test.find_coefficients();
+    //Test.find_coefficients();
 }

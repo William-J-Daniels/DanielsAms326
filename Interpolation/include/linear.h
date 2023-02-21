@@ -9,7 +9,7 @@ template <class T, class U>
 class Linear : public PolynomialInterpolator<T, U>
 {
 public:
-    using PolynomialInterpolator<T, U>::PolynomialInterpolator;
+    Linear(T x, U y) : PolynomialInterpolator<T,U>(x,y) {}
 
     void find_coefficients() override;
 
@@ -27,10 +27,10 @@ void Linear<T, U>::find_coefficients()
     // need points-1 sets of 2 coefficients for a line
     // row 0 is slope row 1 is intercept
 
-    for (auto [x, y] = std::tuple{this->xVals.begin(), this->yVals.end()};)
-    {
-        //
-    }
+    // for (auto [x, y] = std::tuple{this->xVals.begin(), this->yVals.end()};)
+    // {
+    //     //
+    // }
 
     // transform is probably the best option, but im out of time to impliment it properly
     // std::transform(this->xVals.begin(), this->xVals.end(), // defines range
