@@ -50,7 +50,7 @@ Bisection::Bisection(std::function<double(double)> init_Func,
 
 double Bisection::find_root(double left_guess, double right_guess)
 {
-    assert(right_guess > left_guess);
+    assert(right_guess > left_guess);// && right_guess * left_guess < 0.0);
 
     while (0.5 * (right_guess - left_guess) > precision && num_iter < max_iter)
     {
