@@ -112,6 +112,8 @@ public:
     }
     Matrix<T> operator* (Matrix<T> M2);
 
+    T determinant();
+
 private:
     std::size_t rows, columns;
     std::vector<T> data;
@@ -242,6 +244,14 @@ Matrix<T> Matrix<T>::operator*(Matrix<T> M2)
 
     return newMatrix;
 }
+
+// template <class T>
+// T Matrix<T>::determinant()
+// {
+//     for (auto d = data.begin(); d != data.end(); d++)
+//         if (*d == 0.0)
+//             return 0.0;
+// }
 
 } // namespace la
 
