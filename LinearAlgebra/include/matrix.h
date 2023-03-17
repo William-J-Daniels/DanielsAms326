@@ -116,6 +116,7 @@ public:
     }
     Matrix<T> operator* (Matrix<T> M2);
     Matrix<T> naive_mult(Matrix<T> M2);
+    Matrix<T> strassen_mult(Matrix<T> M2);
 
 private:
     std::size_t rows, columns;
@@ -149,6 +150,9 @@ Matrix<T>::Matrix(std::size_t init_rows, std::size_t init_columns, T init_val)
 template <class T>
 void Matrix<T>::rand(T current_seed, T previous_seed)
 {
+    // this could also be threaded, but it's not taking much time as is and
+    // getting a generator for each thread that has good seeds is non-trivial.
+    // Maybe I'll improve it later
     auto Rng = rng::UniformGenerator(current_seed, previous_seed);
 
     for (auto& d : data)
@@ -216,7 +220,6 @@ template <class T>
 Matrix<T> Matrix<T>::operator*(Matrix<T> M2)
 {
     assert(columns = M2.rows);
-    double sum;
 
     auto newMatrix = Matrix<T>(rows, M2.columns, 0.0);
     /*
@@ -225,28 +228,12 @@ Matrix<T> Matrix<T>::operator*(Matrix<T> M2)
      * 512x512.
      */
 
-    //if (columns < 512)
-    //{
-        for (std::size_t i = 0; i < rows; i ++)
-        {
-            for (std::size_t j = 0; j < M2.columns; j++)
-            {
-                sum = 0.0;
-                for (std::size_t k = 0; k < columns; k++)
-                {
-                    sum += data[i*columns + k] * M2(k, j);
-                    //std::cout << sum << ", ";
-                }
-                //std::cout << i << ", " << j << std::endl;
-                newMatrix.set(i, j, sum);
-                //std::cout << std::endl;
-            }
-            //std::cout << std::endl;
-        }
-        //return newMatrix;
-    //} else {
-    //    Matrix<T> tempMatrix[4];
-    //}
+    if (columns < 512)
+    {
+        newMatrix = naive_mult(M2);
+    } else {
+       //Matrix<T> tempMatrix[4];
+    }
 return newMatrix;
 }
 
@@ -259,7 +246,8 @@ Matrix<T> Matrix<T>::naive_mult(Matrix<T> M2)
     for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++)
     {
         Threads.push_back(
-            std::thread(&Matrix<T>::mult_helper, this, std::ref(M2), std::ref(newMatrix), i)
+            std::thread(&Matrix<T>::mult_helper, this,
+                        std::ref(M2), std::ref(newMatrix), i)
         );
     }
 
@@ -273,10 +261,39 @@ template <class T>
 void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout, size_t thread_idx)
 {
     double sum;
+    auto remainder = rows%std::thread::hardware_concurrency();
 
-    for (std::size_t i = (rows/std::thread::hardware_concurrency())*thread_idx;
-         i < (rows/std::thread::hardware_concurrency())*(thread_idx+1);
-         i++)
+    std::size_t start = (rows/std::thread::hardware_concurrency())*thread_idx;
+    std::size_t end = (rows/std::thread::hardware_concurrency())*(thread_idx+1);
+    if(remainder)
+    {
+        // when the number of rows is not divisible by the number of threads...
+        if (thread_idx < remainder)
+        {
+            // and the thread needs to do an extra loop...
+            // add the index to the start, because this is equal to the number
+            // of threads before it that had to do an extra loop,
+            start += thread_idx;
+            // and increase the end by one plus the index to give it more work.
+            end += thread_idx+1;
+        } else {
+            // and the thread does not need to do an extra loop...
+            // add the index to the start, because this is equal to the number
+            // of threads before it that had to do an extra loop,
+            start += thread_idx;
+            // and add teh index to the end, becuase this thread doesn't need to
+            // do extra work.
+            end += thread_idx;
+        }
+    } else {
+        // when the number of rows is divisible by the number of threads, divide
+        // the work trivially
+        start += remainder*(thread_idx+1);
+        end += remainder*(thread_idx+1);
+    }
+
+
+    for (std::size_t i = start; i < end; i++)
     {
         for (std::size_t j = 0; j < M2.columns; j++)
         {
@@ -289,6 +306,23 @@ void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout, size_t thread_idx)
         }
     }
 }
+
+template <class T>
+Matrix<T> Matrix<T>::strassen_mult(Matrix<T> M2)
+{
+    /*
+     * An obvious way to thread Strassen's method is to create a thread for each
+     * of the 7 child multiplications. On my system, this is unideal becuase I
+     * only have two physical cores and four loical threads. The result of this
+     * would be multiple naive multiplications running in parallel, but this is
+     * no more efficient than performing each multiplication with a threaded
+     * implimentation serially. So, I only have to impliment Strassen in a
+     * serial way and any desireable parallelization is handled by my already
+     * written naive algorithm.
+     */
+    assert(rows == columns && rows%2 == 0); // will impliment padding later
+}
+
 
 } // namespace la
 
