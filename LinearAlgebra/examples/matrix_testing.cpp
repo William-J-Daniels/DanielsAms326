@@ -3,11 +3,11 @@
 
 int main()
 {
-    auto Test1 = la::Matrix<double>(3, 3, 5.0);
-    auto Test2 = la::Matrix<double>(3, 3, 1.0);
+    auto Test1 = la::Matrix<double>(std::pow(2, 10), std::pow(2, 10));
+    auto Test2 = la::Matrix<double>(std::pow(2, 10), std::pow(2, 10));
 
-    //Test1.set(1,1,0);
-    std::cout << Test1 << std::endl;
-    std::cout << Test1*10.0 << std::endl;
+    Test1.rand(0.3, 0.305);
+    Test2.rand(0.333, 0.305);
 
+    auto Test3 = Test1.naive_mult(Test2);
 }

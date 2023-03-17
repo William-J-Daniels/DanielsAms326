@@ -1,6 +1,7 @@
 #ifndef LA_MATRIX
 #define LA_MATRIX
 
+#include <uniformgenerator.h>
 #include <vector>
 #include <cassert>
 #include <iterator>
@@ -8,6 +9,7 @@
 #include <algorithm>
 #include <iostream>
 #include <thread>
+#include <cstdlib>
 
 namespace la {
 
@@ -21,6 +23,8 @@ public:
     Matrix() = default;
     Matrix(std::size_t init_rows, std::size_t init_columns);
     Matrix(std::size_t init_rows, std::size_t init_columns, T init_val);
+    // creation routines
+    void rand(T current_seed, T previous_seed);
 
     // accessors and mutators
     std::size_t numrows() { return rows; }
@@ -111,12 +115,13 @@ public:
         return newMatrix;
     }
     Matrix<T> operator* (Matrix<T> M2);
-
-    T determinant();
+    Matrix<T> naive_mult(Matrix<T> M2);
 
 private:
     std::size_t rows, columns;
     std::vector<T> data;
+
+    void mult_helper(Matrix<T>& M2, Matrix<T>& Mout, size_t thread_idx);
 };
 
 template<class T>
@@ -139,6 +144,15 @@ Matrix<T>::Matrix(std::size_t init_rows, std::size_t init_columns, T init_val)
     columns = init_columns;
 
     data = std::vector<T>(rows*columns, init_val);
+}
+
+template <class T>
+void Matrix<T>::rand(T current_seed, T previous_seed)
+{
+    auto Rng = rng::UniformGenerator(current_seed, previous_seed);
+
+    for (auto& d : data)
+        d = Rng();
 }
 
 template <class T>
@@ -205,53 +219,76 @@ Matrix<T> Matrix<T>::operator*(Matrix<T> M2)
     double sum;
 
     auto newMatrix = Matrix<T>(rows, M2.columns, 0.0);
-    /* I did a lot of thinking and reading on the relationship between matrix
-     * multiplication, cache, and keeping the add-multiply and accumulator
-     * hardware busy. What I found is that the best algorithms are able to tile
-     * the matrices such that these parameters are optimal. Portability is
-     * emphasized in this course, so I am reluctant to unroll loops. So, I have
-     * decided to impliment a cach-oblivious algorithm. I think that solution
-     * balances portabilty and performance the best. Since c++ can find out how
-     * many cores are avilible, I will use multithreading.
-     *
-     * More research revealed that what I'm looking for is the multithreaded
-     * Strassen algorithm, since all known algorithms with better asymptotic
-     * complexities are galactic.
-     *
+    /*
      * Huang, Jianyu; Smith, Tyler M.; Henry, Greg M.; van de Geijn, Robert A.
      * (13 Nov 2016) found that Strassan's algorithm becomes useful at about
-     * 512x512. Since most of our applications will be smaller than that, I'll
-     * also impliment the definitional algorithm. Maybe I'll even come up with
-     * my own crossing point. */
+     * 512x512.
+     */
 
-    // but for now, just do basic way, test today
-    for (std::size_t i = 0; i < rows; i ++)
-    {
-        for (std::size_t j = 0; j < M2.columns; j++)
+    //if (columns < 512)
+    //{
+        for (std::size_t i = 0; i < rows; i ++)
         {
-            sum = 0;
-            for (std::size_t k = 0; k < columns; k++)
+            for (std::size_t j = 0; j < M2.columns; j++)
             {
-                sum += data[i*columns + k] * M2(k, j);
-                std::cout << sum << ", ";
+                sum = 0.0;
+                for (std::size_t k = 0; k < columns; k++)
+                {
+                    sum += data[i*columns + k] * M2(k, j);
+                    //std::cout << sum << ", ";
+                }
+                //std::cout << i << ", " << j << std::endl;
+                newMatrix.set(i, j, sum);
+                //std::cout << std::endl;
             }
-            std::cout << i << ", " << j << std::endl;
-            newMatrix.set(i, j, sum);
             //std::cout << std::endl;
         }
-        //std::cout << std::endl;
+        //return newMatrix;
+    //} else {
+    //    Matrix<T> tempMatrix[4];
+    //}
+return newMatrix;
+}
+
+template <class T>
+Matrix<T> Matrix<T>::naive_mult(Matrix<T> M2)
+{
+    std::vector<std::thread> Threads;
+    auto newMatrix = Matrix<T>(rows, M2.columns);
+
+    for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++)
+    {
+        Threads.push_back(
+            std::thread(&Matrix<T>::mult_helper, this, std::ref(M2), std::ref(newMatrix), i)
+        );
     }
+
+    for (auto& t : Threads)
+        t.join();
 
     return newMatrix;
 }
 
-// template <class T>
-// T Matrix<T>::determinant()
-// {
-//     for (auto d = data.begin(); d != data.end(); d++)
-//         if (*d == 0.0)
-//             return 0.0;
-// }
+template <class T>
+void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout, size_t thread_idx)
+{
+    double sum;
+
+    for (std::size_t i = (rows/std::thread::hardware_concurrency())*thread_idx;
+         i < (rows/std::thread::hardware_concurrency())*(thread_idx+1);
+         i++)
+    {
+        for (std::size_t j = 0; j < M2.columns; j++)
+        {
+            sum = 0.0;
+            for (std::size_t k = 0; k < columns; k++)
+            {
+                sum += data[i*columns+k] * M2(k,j);
+            }
+            Mout.set(i,j, sum);
+        }
+    }
+}
 
 } // namespace la
 
