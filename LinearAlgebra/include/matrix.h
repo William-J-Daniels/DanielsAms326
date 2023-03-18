@@ -51,12 +51,13 @@ public:
     auto row_end()   {return data.end();}
     class columnIterator
     {
+    public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type   = std::ptrdiff_t;
         using value_type        = T;
         using pointer           = value_type*;
         using reference         = value_type&;
-    public:
+
         columnIterator(pointer ptr, Matrix &Owner) : m_ptr(ptr), M(Owner) {}
         reference operator*() const {return *m_ptr;}
         pointer operator->() {return m_ptr;}
@@ -96,12 +97,13 @@ public:
     auto column_end()   {return columnIterator(&data[rows*columns], *this);}
     class Slice
     {
+    public:
         using iterator_category = std::forward_iterator_tag;
         using difference_type   = std::ptrdiff_t;
         using value_type        = T;
         using pointer           = value_type*;
         using reference         = value_type&;
-    public:
+
         Slice(pointer ptr, Matrix &Owner,
               std::size_t start_row, std::size_t start_col,
               std::size_t end_row, std::size_t end_col) :
@@ -114,14 +116,12 @@ public:
         {
             if (counter%((ec-sc)+1) == 0)
             { // when we're not the end of the slice's row
-                std::cout <<"end of row, " << counter << std::endl;
                 // get to the next row of the slice
                 m_ptr += M.columns-(ec-sc);
                 counter += 1;
                 return *this;
             }
             // default behavior is to advance by one
-            std::cout << "default" << ", " << counter << std::endl;
             m_ptr += 1;
             counter += 1;
             return *this;
@@ -258,7 +258,7 @@ Matrix<T> Matrix<T>::operator+ (Matrix<T> M2)
     std::transform(row_begin(), row_end(),
                    M2.row_begin(),
                    newMatrix.row_begin(),
-                   [](T i, T j){return i+j;});
+                   std::plus<>{});
 
     return newMatrix;
 }
@@ -272,7 +272,7 @@ Matrix<T> Matrix<T>::operator- (Matrix<T> M2)
     std::transform(row_begin(), row_end(),
                    M2.row_begin(),
                    newMatrix.row_begin(),
-                   [](T i, T j){return i-j;});
+                   std::minus<>{});
 
     return newMatrix;
 }
@@ -289,11 +289,11 @@ Matrix<T> Matrix<T>::operator*(Matrix<T> M2)
      * 512x512.
      */
 
-    if (columns < 512)
+    if (rows < 511)
     {
         newMatrix = naive_mult(M2);
     } else {
-       //Matrix<T> tempMatrix[4];
+        newMatrix = strassen_mult(M2);
     }
 return newMatrix;
 }
@@ -381,23 +381,136 @@ Matrix<T> Matrix<T>::strassen_mult(Matrix<T> M2)
      * serial way and any desireable parallelization is handled by my already
      * written naive algorithm.
      */
-    assert(rows == columns && rows%2 == 0); // will impliment padding later
+    assert(rows == columns && rows%2 == 0 && rows == columns);
+    // will impliment padding later
     auto newMatrix = Matrix<T>(rows, M2.columns);
 
     std::size_t size = rows/2;
-    std::vector<Matrix<T>> Intermediates(8, Matrix(size, size));
+    std::vector<Matrix<T>> Intermediates(14, Matrix(size, size));
+    std::vector<Matrix<T>> Products(7, Matrix(size, size));
 
-    for (size_t i = 0; i < size; i++)
-    {
-        for (unsigned j = 0; j < size; j++)
-        {
-            Intermediates[0].set(i,j, (i,j));
-            Intermediates[1].set(i,j, (i,size+j));
-            Intermediates[2].set(i,j, (size+i,j));
-            Intermediates[3].set(i,j, (size+i,size+j));
+    // make all the intermediate sums
+    // can be parallelized-- maybe later, if we make a thread pool for class
+    std::transform( // A11 + A22
+        slice_begin(0,0,size-1,size-1), slice_end(0,0,size-1,size-1),
+        slice_begin(size, size, rows-1, columns-1), Intermediates[0].row_begin(),
+        std::plus<>{}
+    );
+    std::transform( // B11 + B22
+        M2.slice_begin(0,0,size-1,size-1), M2.slice_end(0,0,size-1,size-1),
+        M2.slice_begin(size, size, rows-1, columns-1), Intermediates[1].row_begin(),
+        std::plus<>{}
+    );
+    std::transform( // A21 + A22
+        slice_begin(size,0,rows-1,size-1), slice_end(size,0,rows-1,size-1),
+        slice_begin(size, size, rows-1, columns-1), Intermediates[2].row_begin(),
+        std::plus<>{}
+    );
+    std::transform( // B12 - B22
+        M2.slice_begin(0,size,size-1,columns-1), M2.slice_end(0,size,size-1,columns-1),
+        M2.slice_begin(size, size, rows-1, columns-1), Intermediates[3].row_begin(),
+        std::minus<>{}
+    );
+    std::transform( // B21 - B11
+        M2.slice_begin(size,0,columns-1,size-1), M2.slice_end(size,0,columns-1,size-1),
+        M2.slice_begin(0,0,size-1,size-1), Intermediates[4].row_begin(),
+        std::minus<>{}
+    );
+    std::transform( // A11 + A12
+        slice_begin(0,0,size-1,size-1), slice_end(0,0,size-1,size-1),
+        slice_begin(0,size,size-1,rows-1), Intermediates[5].row_begin(),
+        std::plus<>{}
+    );
+    std::transform( // A21 - A11
+        slice_begin(size,0,columns-1,size-1), slice_end(size,0,columns-1,size-1),
+        slice_begin(0,0,size-1,size-1), Intermediates[6].row_begin(),
+        std::minus<>{}
+    );
+    std::transform( // B11 + B12
+        M2.slice_begin(0,0,size-1,size-1), M2.slice_end(0,0,size-1,size-1),
+        M2.slice_begin(0,size,size-1,rows-1), Intermediates[7].row_begin(),
+        std::plus<>{}
+    );
+    std::transform( // A12 - A22
+        slice_begin(0,size,size-1,rows-1), slice_end(0,size,size-1,rows-1),
+        slice_begin(size,size,rows-1,columns-1), Intermediates[8].row_begin(),
+        std::minus<>{}
+    );
+    std::transform( // B21 + B22
+        M2.slice_begin(size,0,columns-1,size-1), M2.slice_end(size,0,columns-1,size-1),
+        M2.slice_begin(size,size,rows-1,columns-1), Intermediates[9].row_begin(),
+        std::plus<>{}
+    );
+    std::copy( // B11
+        M2.slice_begin(0,0,size-1,size-1), M2.slice_end(0,0,size-1,size-1),
+        Intermediates[10].row_begin()
+    );
+    std::copy( // A11
+        slice_begin(0,0,size-1,size-1), slice_end(0,0,size-1,size-1),
+        Intermediates[11].row_begin()
+    );
+    std::copy( // A22
+        slice_begin(size,size,rows-1,columns-1), slice_end(size,size,rows-1,columns-1),
+        Intermediates[12].row_begin()
+    );
+    std::copy( // B22
+        M2.slice_begin(size,size,rows-1,columns-1), M2.slice_end(size,size,rows-1,columns-1),
+        Intermediates[13].row_begin()
+    );
 
-        }
-    }
+    // perform multiplications don't parallelize-- naive_mult already is
+    Products[0] = Intermediates[0] * Intermediates[1];
+    Products[1] = Intermediates[2] * Intermediates[10];
+    Products[2] = Intermediates[11] * Intermediates[3];
+    Products[3] = Intermediates[12] * Intermediates[4];
+    Products[4] = Intermediates[5] * Intermediates[13];
+    Products[5] = Intermediates[6] * Intermediates[7];
+    Products[6] = Intermediates[8] * Intermediates[9];
+
+    // transform products into the new matrix
+    // can also be put into a thread pool
+    std::transform( // C11 = M1 + M4
+        Products[0].row_begin(), Products[0].row_end(),
+        Products[3].row_begin(), newMatrix.slice_begin(0,0,size-1,size-1),
+        std::plus<>{}
+    );
+    std::transform( // C11 = C11 - M5 (C11 = M1 + M4 - M5)
+        newMatrix.slice_begin(0,0,size-1,size-1), newMatrix.slice_end(0,0,size-1,size-1),
+        Products[4].row_begin(), newMatrix.slice_begin(0,0,size-1,size-1),
+        std::minus<>{}
+    );
+    std::transform( // C11 = C11 + M7 (C11 = M1 + M4 - M5 + M7)
+        newMatrix.slice_begin(0,0,size-1,size-1), newMatrix.slice_end(0,0,size-1,size-1),
+        Products[6].row_begin(), newMatrix.slice_begin(0,0,size-1,size-1),
+        std::plus<>{}
+    );
+    std::transform( // C12 = M3 + M5
+        Products[2].row_begin(), Products[2].row_end(),
+        Products[4].row_begin(), newMatrix.slice_begin(0,size,size-1,columns-1),
+        std::plus<>{}
+    );
+    std::transform( // C21 = M2 + M4
+        Products[1].row_begin(), Products[1].row_end(),
+        Products[3].row_begin(), newMatrix.slice_begin(size,0,rows-1,size-1),
+        std::plus<>{}
+    );
+    std::transform( // C22 = M1 - M2
+        Products[0].row_begin(), Products[0].row_end(),
+        Products[1].row_begin(), newMatrix.slice_begin(size,size,rows-1,columns-1),
+        std::minus<>{}
+    );
+    std::transform( // C22 = C22 + M3 (C22 = M1 - M2 + M3)
+        newMatrix.slice_begin(size,size,rows-1,columns-1), newMatrix.slice_end(size,size,rows-1,columns-1),
+        Products[2].row_begin(), newMatrix.slice_begin(size,size,rows-1,columns-1),
+        std::plus<>{}
+    );
+    std::transform( // C22 = C22 + M6 (C22 = M1 - M2 + M3 + M6)
+        newMatrix.slice_begin(size,size,rows-1,columns-1), newMatrix.slice_end(size,size,rows-1,columns-1),
+        Products[5].row_begin(), newMatrix.slice_begin(size,size,rows-1,columns-1),
+        std::plus<>{}
+    );
+
+    return newMatrix;
 }
 
 } // namespace la
