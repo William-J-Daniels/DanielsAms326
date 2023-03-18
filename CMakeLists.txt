@@ -14,6 +14,7 @@ add_subdirectory(Interpolation)
 
 # homeworks
 add_subdirectory(HomeworkOne)
+add_subdirectory(HomeworkTwo)
 
 # exams
 add_subdirectory(ExamOne)
