@@ -9,6 +9,7 @@ add_subdirectory(RandomNumbers)
 #add_subdirectory(ParallelComputing)
 add_subdirectory(LinearAlgebra)
 add_subdirectory(Differentiation)
+add_subdirectory(Integration)
 add_subdirectory(RootFinding)
 add_subdirectory(Interpolation)
 
