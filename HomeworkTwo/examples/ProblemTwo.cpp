@@ -10,22 +10,58 @@
  * to use the global variable.
  */
 
-double t;
+double x;
 double Airy(double input);
 
 int main()
 {
-    t = -3.0;
+    x = -3.0;
     auto Airyn3 = intgrt::Midpoint(Airy);
-    Airyn3.set_precision(1.0e-3);
-    std::cout << "With t=-3, I get "
-              << Airyn3.evaluate(0.0, 50.0, std::pow(2,24))*M_PI
+    std::cout << "With x=-3, I get "
+              << Airyn3.converge(0.0, 25.0, 128, std::numeric_limits<unsigned>::max())/M_PI
               << std::endl;
+
+    x = -2.0;
+    auto Airyn2 = intgrt::Midpoint(Airy);
+    std::cout << "With x=-2, I get "
+              << Airyn2.converge(0.0, 25.0, 128, std::numeric_limits<unsigned>::max())/M_PI
+              << std::endl;
+
+    x = -1.0;
+    auto Airyn1 = intgrt::Midpoint(Airy);
+    std::cout << "With x=-1, I get "
+              << Airyn1.converge(0.0, 25.0, 128, std::numeric_limits<unsigned>::max())/M_PI
+              << std::endl;
+
+    x = 0.0;
+    auto Airy0 = intgrt::Midpoint(Airy);
+    std::cout << "With x=0, I get "
+              << Airy0.converge(0.0, 25.0, 128, std::numeric_limits<unsigned>::max())/M_PI
+              << std::endl;
+
+    x = 1.0;
+    auto Airyp1 = intgrt::Midpoint(Airy);
+    std::cout << "With x=1, I get "
+              << Airyp1.converge(0.0, 25.0, 128, std::numeric_limits<unsigned>::max())/M_PI
+              << std::endl;
+
+    x = 2.0;
+    auto Airyp2 = intgrt::Midpoint(Airy);
+    std::cout << "With x=2, I get "
+              << Airyp1.converge(0.0, 25.0, 128, std::numeric_limits<unsigned>::max())/M_PI
+              << std::endl;
+
+    x = 3.0;
+    auto Airyp3 = intgrt::Midpoint(Airy);
+    std::cout << "With x=3, I get "
+              << Airyp3.converge(0.0, 25.0, 128, std::numeric_limits<unsigned>::max())/M_PI
+              << std::endl;
+
     return 0;
 }
 
 double Airy(double input)
 {
-    return std::cos(std::pow(t, 3)/3.0 + input*t);
+    return std::cos(std::pow(input, 3)/3.0 + x*input);
 }
 

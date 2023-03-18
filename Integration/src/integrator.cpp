@@ -1,6 +1,5 @@
 #include <integrator.h>
 
-
 using namespace intgrt;
 
 Integrator::Integrator(std::function<double(double)> init_Func)
@@ -10,6 +9,7 @@ Integrator::Integrator(std::function<double(double)> init_Func)
 
 double Integrator::evaluate(double start, double end, unsigned intervals)
 {
+    integral = 0.0;
     unsigned start_int, end_int;
     double a_start, a_end;
     auto mod = intervals%std::thread::hardware_concurrency();
