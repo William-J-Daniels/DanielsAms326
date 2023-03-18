@@ -21,6 +21,7 @@ public:
                     unsigned max_iter);
 
     void reset();
+    void set_precision(double new_precision);
     double get_integral();
     unsigned get_num_iter();
 

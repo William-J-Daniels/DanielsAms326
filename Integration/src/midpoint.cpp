@@ -9,7 +9,7 @@ double Midpoint::loop(double start, double end, unsigned intervals)
 
     for (unsigned i = 0; i < intervals; i++)
     {
-        part += Function(delta * (i + 0.5));
+        part += Function(start + (delta * (i + 0.5)));
     }
 
     part *= delta;

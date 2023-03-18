@@ -1,5 +1,6 @@
 #include <integrator.h>
 
+
 using namespace intgrt;
 
 Integrator::Integrator(std::function<double(double)> init_Func)
@@ -40,7 +41,9 @@ double Integrator::evaluate(double start, double end, unsigned intervals)
     }
 
     for (auto& p : Partials)
+    {
         integral += p.get();
+    }
 
     return integral;
 }
@@ -64,6 +67,11 @@ void Integrator::reset()
 {
     integral = 0.0;
     num_iter = 1;
+}
+
+void Integrator::set_precision(double new_precision)
+{
+    precision = new_precision;
 }
 
 double Integrator::get_integral()

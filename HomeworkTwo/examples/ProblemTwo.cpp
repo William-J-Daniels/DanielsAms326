@@ -17,10 +17,9 @@ int main()
 {
     t = -3.0;
     auto Airyn3 = intgrt::Midpoint(Airy);
+    Airyn3.set_precision(1.0e-3);
     std::cout << "With t=-3, I get "
-              << Airyn3.converge(
-                  0.0, 25.0, 512, std::numeric_limits<unsigned>::max()
-              )/M_PI
+              << Airyn3.evaluate(0.0, 50.0, std::pow(2,24))*M_PI
               << std::endl;
     return 0;
 }
