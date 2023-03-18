@@ -4,6 +4,7 @@
 #include <functional>
 #include <cassert>
 #include <thread>
+#include <future>
 
 namespace intgrt {
 
@@ -14,7 +15,8 @@ public:
     Integrator(std::function<double(double)> init_Func);
     virtual ~Integrator() = default;
 
-    virtual double evaluate(double start, double end, unsigned intervals) = 0;
+    virtual double loop(double start, double end, unsigned intervals) = 0;
+    double evaluate(double start, double end, unsigned intervals);
     double converge(double start, double end, unsigned intervals,
                     unsigned max_iter);
 

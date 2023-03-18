@@ -7,6 +7,8 @@ project(Integration VERSION 1.0.0)
 add_library(${PROJECT_NAME} SHARED
   include/integrator.h
   src/integrator.cpp
+  include/midpoint.h
+  src/midpoint.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -19,9 +21,10 @@ target_include_directories(${PROJECT_NAME}
 
 set(public_headers
   include/integrator.h
+  include/midpoint.h
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEARER "${public_headers}")
 
-# add_executable(int_testing examples/matrix_testing.cpp)
-# target_link_libraries(int_testing PUBLIC ${PROJECT_NAME})
+add_executable(MidpointTest examples/MidpointExample.cpp)
+target_link_libraries(MidpointTest PUBLIC ${PROJECT_NAME})
