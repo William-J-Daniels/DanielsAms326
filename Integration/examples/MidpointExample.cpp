@@ -4,14 +4,17 @@
 
 double test_func(double in)
 {
-    return std::sin(in);
+    return in;
 }
 
 int main()
 {
     auto MP = intgrt::Midpoint(test_func);
 
-    std::cout << MP.evaluate(0.0, 2.0*M_PI, 512);
+    for (int i = 1; i <= 32; i++)
+    {
+        std::cout << i << ", " << MP.evaluate(0.0, 1.0, i) << std::endl;
+    }
 
     return 0;
 }

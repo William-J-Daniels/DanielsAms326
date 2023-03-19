@@ -26,8 +26,8 @@ double Integrator::evaluate(double start, double end, unsigned intervals)
                 start_int += i;
                 end_int   += i+1;
             } else {
-                start_int += i;
-                end_int   += i;
+                start_int += mod;
+                end_int   += mod;
             }
         } else {
             start_int += mod*(i+1);
@@ -36,9 +36,11 @@ double Integrator::evaluate(double start, double end, unsigned intervals)
         a_start = start + ((end-start)/intervals)*start_int;
         a_end   = start + ((end-start)/intervals)*end_int;
         if (a_start!=a_end)
+        {
             Partials.push_back(std::async(
                 &Integrator::loop, this, a_start, a_end, end_int-start_int
             ));
+        }
     }
 
     for (auto& p : Partials)
