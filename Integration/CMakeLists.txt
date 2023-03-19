@@ -11,6 +11,8 @@ add_library(${PROJECT_NAME} SHARED
   src/midpoint.cpp
   include/trapezoid.h
   src/trapezoid.cpp
+  include/simpson.h
+  src/simpson.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
@@ -27,6 +29,7 @@ set(public_headers
   include/integrator.h
   include/midpoint.h
   include/trapezoid.h
+  include/simpson.h
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEARER "${public_headers}")
@@ -36,3 +39,6 @@ target_link_libraries(MidpointTest PUBLIC ${PROJECT_NAME})
 
 add_executable(TrapezoidTest examples/TrapezoidExample.cpp)
 target_link_libraries(TrapezoidTest PUBLIC ${PROJECT_NAME})
+
+add_executable(SimpsonsTest examples/SimpsonsExample.cpp)
+target_link_libraries(SimpsonsTest PUBLIC ${PROJECT_NAME})
