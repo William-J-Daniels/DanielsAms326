@@ -6,6 +6,19 @@ project(AMS326 VERSION 1.0.0)
 
 find_package(Threads)
 
+option(debugging "Compiler settings for debugging" OFF)
+option(performance "Compiler settings for performance" ON)
+
+if(debugging)
+  add_compile_options(-Wall)
+  add_compile_options(-fsanitize=address)
+  link_libraries(-fsanitize=address)
+endif()
+
+if(performance)
+  add_compile_options(-O3)
+endif()
+
 # libraries (roughly corresponds to lectures)
 add_subdirectory(RandomNumbers)
 #add_subdirectory(ParallelComputing)
