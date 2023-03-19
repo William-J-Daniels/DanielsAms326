@@ -13,9 +13,14 @@ add_library(${PROJECT_NAME} SHARED
   src/trapezoid.cpp
   include/simpson.h
   src/simpson.cpp
+  include/boole.h
+  src/boole.cpp
+  include/montecarlo.h
+  src/montecarlo.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${PROJECT_NAME} PUBLIC random_numbers)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -30,6 +35,8 @@ set(public_headers
   include/midpoint.h
   include/trapezoid.h
   include/simpson.h
+  include/boole.h
+  include/montecarlo.h
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEARER "${public_headers}")
@@ -42,3 +49,9 @@ target_link_libraries(TrapezoidTest PUBLIC ${PROJECT_NAME})
 
 add_executable(SimpsonsTest examples/SimpsonsExample.cpp)
 target_link_libraries(SimpsonsTest PUBLIC ${PROJECT_NAME})
+
+add_executable(BooleTest examples/BooleExample.cpp)
+target_link_libraries(BooleTest PUBLIC ${PROJECT_NAME})
+
+add_executable(MonteCarloTest examples/MonteCarloExample.cpp)
+target_link_libraries(MonteCarloTest PUBLIC ${PROJECT_NAME})
