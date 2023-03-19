@@ -11,6 +11,8 @@ add_library(${PROJECT_NAME} SHARED
   src/midpoint.cpp
 )
 
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/

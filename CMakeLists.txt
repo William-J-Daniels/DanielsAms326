@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(AMS326 VERSION 1.0.0)
 
+find_package(Threads)
+
 # libraries (roughly corresponds to lectures)
 add_subdirectory(RandomNumbers)
 #add_subdirectory(ParallelComputing)

@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME} SHARED
   include/matrix.h
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC random_numbers)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
