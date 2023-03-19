@@ -13,7 +13,7 @@ double Integrator::evaluate(double start, double end, unsigned intervals)
     unsigned start_int, end_int;
     double a_start, a_end;
     auto mod = intervals%std::thread::hardware_concurrency();
-    std::vector<std::future<double>> Partials(std::thread::hardware_concurrency());
+    std::vector<std::future<double>> Partials;
 
     for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++)
     {
@@ -35,9 +35,10 @@ double Integrator::evaluate(double start, double end, unsigned intervals)
         }
         a_start = start + ((end-start)/intervals)*start_int;
         a_end   = start + ((end-start)/intervals)*end_int;
-        Partials[i] = std::async(
-            &Integrator::loop, this, a_start, a_end, end_int-start_int
-        );
+        if (a_start!=a_end)
+            Partials.push_back(std::async(
+                &Integrator::loop, this, a_start, a_end, end_int-start_int
+            ));
     }
 
     for (auto& p : Partials)
