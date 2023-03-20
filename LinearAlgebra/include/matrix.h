@@ -13,8 +13,6 @@
 
 namespace la {
 
-    // BIG todo: make thing pass by reference
-
 template <class T>
 class Matrix
 {
@@ -154,10 +152,10 @@ public:
 
     // matrix operations (will grow over time)
     Matrix<T> operator- ();
-    Matrix<T> operator+ (Matrix<T> M2);
-    Matrix<T> operator- (Matrix<T> M2);
+    Matrix<T> operator+ (Matrix<T>& M2);
+    Matrix<T> operator- (Matrix<T>& M2);
 
-    friend Matrix<T> operator* (T scalar, Matrix<T> M)
+    friend Matrix<T> operator* (T scalar, Matrix<T>& M)
     {
         auto newMatrix = Matrix(M.rows, M.columns);
 
@@ -166,7 +164,7 @@ public:
 
         return newMatrix;
     }
-    friend Matrix<T> operator* (Matrix<T> M, T scalar)
+    friend Matrix<T> operator* (Matrix<T>& M, T scalar)
     {
         auto newMatrix = Matrix(M.rows, M.columns);
 
@@ -175,15 +173,16 @@ public:
 
         return newMatrix;
     }
-    Matrix<T> operator* (Matrix<T> M2);
-    Matrix<T> naive_mult(Matrix<T> M2);
-    Matrix<T> strassen_mult(Matrix<T> M2);
+    Matrix<T> operator* (Matrix<T>& M2);
+    Matrix<T> naive_mult(Matrix<T>& M2);
+    Matrix<T> strassen_mult(Matrix<T>& M2);
 
 private:
     std::size_t rows, columns;
     std::vector<T> data;
 
-    void mult_helper(Matrix<T>& M2, Matrix<T>& Mout, size_t thread_idx);
+    void mult_helper(Matrix<T>& M2, Matrix<T>& Mout,
+                     size_t thread_idx);
 };
 
 template<class T>
@@ -249,7 +248,7 @@ Matrix<T> Matrix<T>::operator-()
 }
 
 template <class T>
-Matrix<T> Matrix<T>::operator+ (Matrix<T> M2)
+Matrix<T> Matrix<T>::operator+ (Matrix<T>& M2)
 {
     // only defined for matrices of the same datatype
     assert(rows == M2.rows && columns == M2.columns);
@@ -264,7 +263,7 @@ Matrix<T> Matrix<T>::operator+ (Matrix<T> M2)
 }
 
 template <class T>
-Matrix<T> Matrix<T>::operator- (Matrix<T> M2)
+Matrix<T> Matrix<T>::operator- (Matrix<T>& M2)
 {
     assert(rows == M2.rows && columns == M2.columns);
 
@@ -278,7 +277,7 @@ Matrix<T> Matrix<T>::operator- (Matrix<T> M2)
 }
 
 template <class T>
-Matrix<T> Matrix<T>::operator*(Matrix<T> M2)
+Matrix<T> Matrix<T>::operator*(Matrix<T>& M2)
 {
     assert(columns = M2.rows);
 
@@ -299,7 +298,7 @@ return newMatrix;
 }
 
 template <class T>
-Matrix<T> Matrix<T>::naive_mult(Matrix<T> M2)
+Matrix<T> Matrix<T>::naive_mult(Matrix<T>& M2)
 {
     std::vector<std::thread> Threads;
     auto newMatrix = Matrix<T>(rows, M2.columns);
@@ -319,7 +318,8 @@ Matrix<T> Matrix<T>::naive_mult(Matrix<T> M2)
 }
 
 template <class T>
-void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout, size_t thread_idx)
+void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout,
+                            size_t thread_idx)
 {
     double sum;
     auto remainder = rows%std::thread::hardware_concurrency();
@@ -369,7 +369,7 @@ void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout, size_t thread_idx)
 }
 
 template <class T>
-Matrix<T> Matrix<T>::strassen_mult(Matrix<T> M2)
+Matrix<T> Matrix<T>::strassen_mult(Matrix<T>& M2)
 {
     /*
      * An obvious way to thread Strassen's method is to create a thread for each
