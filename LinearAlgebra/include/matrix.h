@@ -21,6 +21,7 @@ public:
     Matrix() = default;
     Matrix(std::size_t init_rows, std::size_t init_columns);
     Matrix(std::size_t init_rows, std::size_t init_columns, T init_val);
+    Matrix(std::vector<std::vector<T>> v);
     // creation routines
     void rand(T current_seed, T previous_seed);
 
@@ -205,6 +206,25 @@ Matrix<T>::Matrix(std::size_t init_rows, std::size_t init_columns, T init_val)
     columns = init_columns;
 
     data = std::vector<T>(rows*columns, init_val);
+}
+
+template <class T>
+Matrix<T>::Matrix(std::vector<std::vector<T>> v)
+{ // https://zingale.github.io/computational_astrophysics/basics/linear-algebra/la-cxx.html
+    rows    = v.size();
+    columns = v[0].size();
+    data.resize(rows*columns);
+    std::size_t idx = 0;
+
+    for (std::size_t i = 0; i < rows; ++i)
+    {
+        assert(v[i].size() == columns);
+        for (std::size_t j = 0; j < columns; ++j)
+        {
+            data[idx] = v[i][j];
+            ++idx;
+        }
+    }
 }
 
 template <class T>
