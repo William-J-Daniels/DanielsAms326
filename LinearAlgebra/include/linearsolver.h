@@ -23,6 +23,7 @@ public:
     LinearSolver<T>(Matrix<T> init_A, std::vector<T> init_b);
 
     std::vector<T> gaus_elim();
+    std::vector<T> jacobi_iter(std::vector<T> InitGuess);
 
 private:
     Matrix<T> A;
@@ -244,7 +245,6 @@ void LinearSolver<T>::back_substitution()
 
     for (int brow = (A.numcolumns()-2); brow >= 0; --brow)
     {
-        //std::cout << brow << std::endl;
         double sum = b[brow];
         for (std::size_t bcol = brow+1; bcol < A.numcolumns(); ++bcol)
         {
@@ -252,6 +252,43 @@ void LinearSolver<T>::back_substitution()
         }
         Solutions[brow] = sum / A(brow, brow);
     }
+}
+
+template <class T>
+std::vector<T> LinearSolver<T>::jacobi_iter(std::vector<T> InitGuess)
+{
+    assert(A.numrows() == A.numcolumns());
+    assert(InitGuess.size() == A.numrows());
+
+    // would be nice to know how to treat sparse matrices here
+    Matrix<T> D(A.numrows(), A.numcolumns());
+    Matrix<T> R(A.numrows(), A.numcolumns());
+    Matrix<T> B(A.numrows(), 1);
+    Matrix<T> X(A.numrows(), 1);
+    Matrix<T> lastX(A.numrows(), 1);
+    for (std::size_t row = 0; row < A.numrows(); row++)
+    {
+        for (std::size_t col = 0; col < A.numcolumns(); col++)
+        {
+            if (row == col)
+                D.set(row, col, 1.0/A(row, col));
+            else
+                R.set(row, col, A(row, col));
+        }
+        B.set(row, 0, b[row]);
+        X.set(row, 0, InitGuess[row]);
+    }
+
+    do
+    {
+        lastX = X;
+        X = R * X;
+        X = B - X;
+        X = D * X;
+        std::cout << X << std::endl;
+    } while (true);
+
+    return Solutions;
 }
 
 } // namespace la

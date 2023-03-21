@@ -16,9 +16,12 @@ int main()
     // A.rand(0.01, 0.01);
     // std::vector<double> b(10);
 
+    std::vector<double> init_guess{0,0,0};
+
     auto Sln = la::LinearSolver(A, b);
 
-    auto Results = Sln.gaus_elim();
+    //auto Results = Sln.gaus_elim();
+    auto Results = Sln.jacobi_iter(init_guess);
 
     for (auto& R : Results)
         std::cout << R << " ";
