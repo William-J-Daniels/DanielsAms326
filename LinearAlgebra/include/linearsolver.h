@@ -106,8 +106,8 @@ void LinearSolver<T>::find_scales_helper(unsigned start, unsigned end,
     for (unsigned i = start; i < end; i++)
     {
         Scales[i] = *std::max_element(
-            A.slice_begin(start,0,start,A.numcolumns()-1),
-            A.slice_end(start,0,start,A.numcolumns()-1),
+            A.slice_begin(i,0,i,A.numcolumns()-1),
+            A.slice_end(i,0,i,A.numcolumns()-1),
             [] (T a, T b) { return std::abs(a) < std::abs(b); }
         );
     }
