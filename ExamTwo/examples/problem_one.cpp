@@ -29,7 +29,7 @@ int main()
     auto Simp = intgrt::Simpson  (Airy);
     auto Mid  = intgrt::Midpoint (Airy);
     auto Trap = intgrt::Trapezoid(Airy);
-    unsigned num_iter = std::pow(2, 20);
+    unsigned num_iter = std::pow(2, 30);
 
     for (int i = -3; i <= 3; i++)
     {
