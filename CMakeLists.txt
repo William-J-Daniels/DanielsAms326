@@ -34,3 +34,4 @@ add_subdirectory(HomeworkTwo)
 
 # exams
 add_subdirectory(ExamOne)
+add_subdirectory(ExamTwo)
