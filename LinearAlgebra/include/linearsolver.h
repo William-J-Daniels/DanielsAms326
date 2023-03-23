@@ -36,6 +36,8 @@ private:
     void find_scales_helper(unsigned start, unsigned end,
                             std::vector<T>& Scales);
     void swap_rows(std::size_t north, std::size_t south);
+    void swap_rows(std::size_t north, std::size_t south,
+                   std::vector<T> extra_vec);
     void forward_eliminate(std::size_t startr, std::size_t endr,
                            std::size_t current_row);
     void back_substitution();
@@ -57,7 +59,7 @@ std::vector<T> LinearSolver<T>::gaus_elim()
     Solutions = std::vector<T>(A.numcolumns());
     auto Scales = find_scales();
     double scaled_col, col_max, row_max_idx;
-    std::size_t mod, start, end; // for distributing work to threads
+    //std::size_t mod, start, end; // for distributing work to threads
 
     for (std::size_t current_row = 0; current_row < A.numrows(); current_row++)
     { // loop over all rows
@@ -75,7 +77,7 @@ std::vector<T> LinearSolver<T>::gaus_elim()
             }
         }
         if (row_max_idx-current_row)
-            swap_rows(row_max_idx, current_row);
+            swap_rows(row_max_idx, current_row, Scales);
 
         // then we forward eliminate
 
@@ -215,6 +217,19 @@ void LinearSolver<T>::swap_rows(std::size_t north, std::size_t south)
     b[south] = VecTemp;
 
     num_pivots++;
+}
+
+template <class T>
+void LinearSolver<T>::swap_rows(std::size_t north, std::size_t south,
+                   std::vector<T> extra_vec)
+{
+    T VecTemp;
+
+    swap_rows(north, south);
+
+    VecTemp = extra_vec[north];
+    extra_vec[north] = extra_vec[south];
+    extra_vec[south] = VecTemp;
 }
 
 template <class T>
