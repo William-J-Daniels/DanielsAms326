@@ -4,7 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(AMS326 VERSION 1.0.0)
 
-find_package(Threads)
+find_package(Threads REQUIRED)
+find_package(TBB REQUIRED)
 
 option(debugging "Compiler settings for debugging" OFF)
 option(performance "Compiler settings for performance" ON)

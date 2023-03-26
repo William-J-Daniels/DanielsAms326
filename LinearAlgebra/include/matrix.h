@@ -10,6 +10,7 @@
 #include <iostream>
 #include <thread>
 #include <cstdlib>
+#include <execution>
 
 namespace la {
 
@@ -160,8 +161,12 @@ public:
     {
         auto newMatrix = Matrix(M.rows, M.columns);
 
-        for (std::size_t i = 0; i < M.data.size(); i++)
-            newMatrix.data[i] = scalar * M.data[i];
+        std::transform(
+            std::execution::par,
+            M.row_begin(), M.row_end(),
+            newMatrix.row_begin(),
+            [&scalar] (T a) { return a * scalar; }
+        );
 
         return newMatrix;
     }
@@ -169,11 +174,16 @@ public:
     {
         auto newMatrix = Matrix(M.rows, M.columns);
 
-        for (std::size_t i = 0; i < M.data.size(); i++)
-            newMatrix.data[i] = scalar * M.data[i];
+        std::transform(
+            std::execution::par,
+            M.row_begin(), M.row_end(),
+            newMatrix.row_begin(),
+            [&scalar] (T a) { return a * scalar; }
+        );
 
         return newMatrix;
     }
+    void transpose();
     Matrix<T> operator* (Matrix<T>& M2);
     Matrix<T> naive_mult(Matrix<T>& M2);
     Matrix<T> strassen_mult(Matrix<T>& M2);
@@ -181,6 +191,8 @@ public:
 private:
     std::size_t rows, columns;
     std::vector<T> data;
+    bool row_major = true; // always stored row major, really refers to whether
+                           // the cache is setup for multiplication
 
     void mult_helper(Matrix<T>& M2, Matrix<T>& Mout,
                      size_t thread_idx);
@@ -214,6 +226,8 @@ Matrix<T>::Matrix(std::vector<std::vector<T>> v)
     rows    = v.size();
     columns = v[0].size();
     data.resize(rows*columns);
+
+
     std::size_t idx = 0;
 
     for (std::size_t i = 0; i < rows; ++i)
@@ -260,9 +274,12 @@ template <class T>
 Matrix<T> Matrix<T>::operator-()
 {
     auto newMatrix = Matrix<T>(rows, columns);
-    std::transform(row_begin(), row_end(),
-                   newMatrix.row_begin(),
-                   [](T i){return -i;});
+    std::transform(
+        std::execution::par,
+        row_begin(), row_end(),
+        newMatrix.row_begin(),
+        std::negate<>{}
+    );
 
     return newMatrix;
 }
@@ -274,10 +291,13 @@ Matrix<T> Matrix<T>::operator+ (Matrix<T>& M2)
     assert(rows == M2.rows && columns == M2.columns);
 
     auto newMatrix = Matrix<T>(rows, columns);
-    std::transform(row_begin(), row_end(),
-                   M2.row_begin(),
-                   newMatrix.row_begin(),
-                   std::plus<>{});
+    std::transform(
+        std::execution::par,
+        row_begin(), row_end(),
+        M2.row_begin(),
+        newMatrix.row_begin(),
+        std::plus<>{}
+    );
 
     return newMatrix;
 }
@@ -288,12 +308,29 @@ Matrix<T> Matrix<T>::operator- (Matrix<T>& M2)
     assert(rows == M2.rows && columns == M2.columns);
 
     auto newMatrix = Matrix<T>(rows, columns);
-    std::transform(row_begin(), row_end(),
-                   M2.row_begin(),
-                   newMatrix.row_begin(),
-                   std::minus<>{});
+    std::transform(
+        std::execution::par,
+        row_begin(), row_end(),
+        M2.row_begin(),
+        newMatrix.row_begin(),
+        std::minus<>{});
 
     return newMatrix;
+}
+
+template <class T>
+void Matrix<T>::transpose()
+{ // https://stackoverflow.com/questions/16737298/what-is-the-fastest-way-to-transpose-a-matrix-in-c
+    // this method changes the data- change is noted with row_major variable
+
+    for (int n = 0; n < rows*columns; n++)
+    {
+        auto dv = std::div(n, rows);
+
+        data[n] = data[columns*dv.rem + dv.quot];
+    }
+
+    row_major = false;
 }
 
 template <class T>
@@ -356,7 +393,7 @@ void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout,
             // of threads before it that had to do an extra loop,
             start += thread_idx;
             // and increase the end by one plus the index to give it more work.
-            end += thread_idx+1;
+            end   += thread_idx+1;
         } else {
             // and the thread does not need to do an extra loop...
             // add the index to the start, because this is equal to the number
@@ -364,13 +401,13 @@ void Matrix<T>::mult_helper(Matrix<T>& M2, Matrix<T>& Mout,
             start += thread_idx;
             // and add the index to the end, becuase this thread doesn't need to
             // do extra work.
-            end += thread_idx;
+            end   += thread_idx;
         }
     } else {
         // when the number of rows is divisible by the number of threads, divide
         // the work trivially
         start += remainder*(thread_idx+1);
-        end += remainder*(thread_idx+1);
+        end   += remainder*(thread_idx+1);
     }
 
 
@@ -397,9 +434,10 @@ Matrix<T> Matrix<T>::strassen_mult(Matrix<T>& M2)
      * only have two physical cores and four logcal threads. The result of this
      * would be multiple naive multiplications running in parallel, but this is
      * no more efficient than performing each multiplication with a threaded
-     * implimentation serially. So, I only have to impliment Strassen in a
-     * serial way and any desireable parallelization is handled by my already
-     * written naive algorithm.
+     * implimentation serially, as long as I take advantage of std::execution to
+     * make the copying and addition parallel. Might incur additional thread
+     * overhead, but for large matrices this won't matter and this approach is
+     * best for portability amoung systems with different numbers of CPUs
      */
     assert(rows == columns && rows%2 == 0 && rows == columns);
     // will impliment padding later
@@ -412,68 +450,82 @@ Matrix<T> Matrix<T>::strassen_mult(Matrix<T>& M2)
     // make all the intermediate sums
     // can be parallelized-- maybe later, if we make a thread pool for class
     std::transform( // A11 + A22
+        std::execution::par,
         slice_begin(0,0,size-1,size-1), slice_end(0,0,size-1,size-1),
         slice_begin(size, size, rows-1, columns-1), Intermediates[0].row_begin(),
         std::plus<>{}
     );
     std::transform( // B11 + B22
+        std::execution::par,
         M2.slice_begin(0,0,size-1,size-1), M2.slice_end(0,0,size-1,size-1),
         M2.slice_begin(size, size, rows-1, columns-1), Intermediates[1].row_begin(),
         std::plus<>{}
     );
     std::transform( // A21 + A22
+        std::execution::par,
         slice_begin(size,0,rows-1,size-1), slice_end(size,0,rows-1,size-1),
         slice_begin(size, size, rows-1, columns-1), Intermediates[2].row_begin(),
         std::plus<>{}
     );
     std::transform( // B12 - B22
+        std::execution::par,
         M2.slice_begin(0,size,size-1,columns-1), M2.slice_end(0,size,size-1,columns-1),
         M2.slice_begin(size, size, rows-1, columns-1), Intermediates[3].row_begin(),
         std::minus<>{}
     );
     std::transform( // B21 - B11
+        std::execution::par,
         M2.slice_begin(size,0,columns-1,size-1), M2.slice_end(size,0,columns-1,size-1),
         M2.slice_begin(0,0,size-1,size-1), Intermediates[4].row_begin(),
         std::minus<>{}
     );
     std::transform( // A11 + A12
+        std::execution::par,
         slice_begin(0,0,size-1,size-1), slice_end(0,0,size-1,size-1),
         slice_begin(0,size,size-1,rows-1), Intermediates[5].row_begin(),
         std::plus<>{}
     );
     std::transform( // A21 - A11
+        std::execution::par,
         slice_begin(size,0,columns-1,size-1), slice_end(size,0,columns-1,size-1),
         slice_begin(0,0,size-1,size-1), Intermediates[6].row_begin(),
         std::minus<>{}
     );
     std::transform( // B11 + B12
+        std::execution::par,
         M2.slice_begin(0,0,size-1,size-1), M2.slice_end(0,0,size-1,size-1),
         M2.slice_begin(0,size,size-1,rows-1), Intermediates[7].row_begin(),
         std::plus<>{}
     );
     std::transform( // A12 - A22
+        std::execution::par,
         slice_begin(0,size,size-1,rows-1), slice_end(0,size,size-1,rows-1),
         slice_begin(size,size,rows-1,columns-1), Intermediates[8].row_begin(),
         std::minus<>{}
     );
     std::transform( // B21 + B22
+        std::execution::par,
         M2.slice_begin(size,0,columns-1,size-1), M2.slice_end(size,0,columns-1,size-1),
         M2.slice_begin(size,size,rows-1,columns-1), Intermediates[9].row_begin(),
         std::plus<>{}
     );
     std::copy( // B11
+        std::execution::par,
         M2.slice_begin(0,0,size-1,size-1), M2.slice_end(0,0,size-1,size-1),
         Intermediates[10].row_begin()
     );
     std::copy( // A11
+        std::execution::par,
         slice_begin(0,0,size-1,size-1), slice_end(0,0,size-1,size-1),
         Intermediates[11].row_begin()
     );
     std::copy( // A22
+        std::execution::par,
         slice_begin(size,size,rows-1,columns-1), slice_end(size,size,rows-1,columns-1),
         Intermediates[12].row_begin()
     );
     std::copy( // B22
+        std::execution::par,
         M2.slice_begin(size,size,rows-1,columns-1), M2.slice_end(size,size,rows-1,columns-1),
         Intermediates[13].row_begin()
     );
@@ -490,41 +542,49 @@ Matrix<T> Matrix<T>::strassen_mult(Matrix<T>& M2)
     // transform products into the new matrix
     // can also be put into a thread pool
     std::transform( // C11 = M1 + M4
+        std::execution::par,
         Products[0].row_begin(), Products[0].row_end(),
         Products[3].row_begin(), newMatrix.slice_begin(0,0,size-1,size-1),
         std::plus<>{}
     );
     std::transform( // C11 = C11 - M5 (C11 = M1 + M4 - M5)
+        std::execution::par,
         newMatrix.slice_begin(0,0,size-1,size-1), newMatrix.slice_end(0,0,size-1,size-1),
         Products[4].row_begin(), newMatrix.slice_begin(0,0,size-1,size-1),
         std::minus<>{}
     );
     std::transform( // C11 = C11 + M7 (C11 = M1 + M4 - M5 + M7)
+        std::execution::par,
         newMatrix.slice_begin(0,0,size-1,size-1), newMatrix.slice_end(0,0,size-1,size-1),
         Products[6].row_begin(), newMatrix.slice_begin(0,0,size-1,size-1),
         std::plus<>{}
     );
     std::transform( // C12 = M3 + M5
+        std::execution::par,
         Products[2].row_begin(), Products[2].row_end(),
         Products[4].row_begin(), newMatrix.slice_begin(0,size,size-1,columns-1),
         std::plus<>{}
     );
     std::transform( // C21 = M2 + M4
+        std::execution::par,
         Products[1].row_begin(), Products[1].row_end(),
         Products[3].row_begin(), newMatrix.slice_begin(size,0,rows-1,size-1),
         std::plus<>{}
     );
     std::transform( // C22 = M1 - M2
+        std::execution::par,
         Products[0].row_begin(), Products[0].row_end(),
         Products[1].row_begin(), newMatrix.slice_begin(size,size,rows-1,columns-1),
         std::minus<>{}
     );
     std::transform( // C22 = C22 + M3 (C22 = M1 - M2 + M3)
+        std::execution::par,
         newMatrix.slice_begin(size,size,rows-1,columns-1), newMatrix.slice_end(size,size,rows-1,columns-1),
         Products[2].row_begin(), newMatrix.slice_begin(size,size,rows-1,columns-1),
         std::plus<>{}
     );
     std::transform( // C22 = C22 + M6 (C22 = M1 - M2 + M3 + M6)
+        std::execution::par,
         newMatrix.slice_begin(size,size,rows-1,columns-1), newMatrix.slice_end(size,size,rows-1,columns-1),
         Products[5].row_begin(), newMatrix.slice_begin(size,size,rows-1,columns-1),
         std::plus<>{}

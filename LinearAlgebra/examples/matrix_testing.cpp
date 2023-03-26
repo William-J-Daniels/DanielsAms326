@@ -10,4 +10,11 @@ int main()
     Test2.rand(0.333, 0.305);
 
     auto Test3 = Test1 * Test2;
+
+    // auto A = la::Matrix<double>(4, 4);
+    // A.rand(3.333, 3.321);
+    //
+    // std::cout << A << std::endl;
+    // A.transpose();
+    // std::cout << A - A << std::endl;
 }
