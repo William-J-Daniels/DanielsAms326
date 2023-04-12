@@ -227,7 +227,6 @@ Matrix<T>::Matrix(std::vector<std::vector<T>> v)
     columns = v[0].size();
     data.resize(rows*columns);
 
-
     std::size_t idx = 0;
 
     for (std::size_t i = 0; i < rows; ++i)
@@ -322,14 +321,24 @@ template <class T>
 void Matrix<T>::transpose()
 { // https://stackoverflow.com/questions/16737298/what-is-the-fastest-way-to-transpose-a-matrix-in-c
     // this method changes the data- change is noted with row_major variable
+    // can imporve parallelization later
+
+    auto TempData = std::vector<T>(data.size());
+
+    std::copy(
+        std::execution::par,
+        data.begin(), data.end(),
+        TempData.begin()
+    );
 
     for (int n = 0; n < rows*columns; n++)
     {
         auto dv = std::div(n, rows);
 
-        data[n] = data[columns*dv.rem + dv.quot];
+        data[n] = TempData[columns*dv.rem + dv.quot];
     }
 
+    std::swap(rows, columns);
     row_major = false;
 }
 
@@ -359,6 +368,9 @@ Matrix<T> Matrix<T>::naive_mult(Matrix<T>& M2)
 {
     std::vector<std::thread> Threads;
     auto newMatrix = Matrix<T>(rows, M2.columns);
+
+    // if (M2.rows == M2.columns && M2.row_major)
+    //     M2.transpose(); // figure out later have HW to do
 
     for (unsigned i = 0; i < std::thread::hardware_concurrency(); i++)
     {

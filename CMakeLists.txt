@@ -6,6 +6,7 @@ project(AMS326 VERSION 1.0.0)
 
 find_package(Threads REQUIRED)
 find_package(TBB REQUIRED)
+find_package(OpenMP REQUIRED)
 
 option(debugging "Compiler settings for debugging" OFF)
 option(performance "Compiler settings for performance" ON)

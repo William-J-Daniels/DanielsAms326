@@ -20,8 +20,8 @@ int main()
 
     auto Sln = la::LinearSolver(A, b);
 
-    //auto Results = Sln.gaus_elim();
-    auto Results = Sln.jacobi_iter(init_guess);
+    auto Results = Sln.gaus_elim();
+    // auto Results = Sln.jacobi_iter(init_guess);
 
     for (auto& R : Results)
         std::cout << R << " ";
