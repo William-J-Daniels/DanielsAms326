@@ -3,11 +3,11 @@
 
 int main()
 {
-    la::DiagonalMatrix<double> A{{1, 2, 3, 4}};
-    std::vector<double> b{1, 2, 3, 4};
+    auto A = la::Matrix<double> (10, 10);
+    A.rand(0.334, 0.3347);
+    std::cout << A <<std::endl;
 
-    auto c = A*b;
-
-    for (auto& elem : c)
-        std::cout << elem << " ";
+    auto v = A.diag();
+    for (auto& vee : v)
+        std::cout << vee << " ";
 }

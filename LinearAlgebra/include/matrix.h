@@ -184,6 +184,7 @@ public:
         return newMatrix;
     }
     void transpose();
+    std::vector<T> diag();
     Matrix<T> operator* (Matrix<T>& M2);
     std::vector<T> operator* (std::vector<T> V);
     Matrix<T> naive_mult(Matrix<T>& M2);
@@ -341,6 +342,20 @@ void Matrix<T>::transpose()
 
     std::swap(rows, columns);
     row_major = false;
+}
+
+template <typename T>
+std::vector<T> Matrix<T>::diag()
+{
+    assert(rows == columns);
+
+    auto newVec = std::vector<T> (rows);
+
+    #pragma omp parallel for
+    for (std::size_t i = 0; i < rows; i++)
+        newVec[i] = data[i*columns + i];
+
+    return newVec;
 }
 
 template <class T>
@@ -640,6 +655,11 @@ public:
     auto begin() { return Data.begin(); }
     auto end()   { return Data.end(); }
 
+    // math
+    DiagonalMatrix<T> operator* (DiagonalMatrix<T> &M);
+    std::vector<T> operator* (std::vector<T> &v);
+    void invert();
+
 private:
     std::vector<T> Data;
 };
@@ -662,23 +682,54 @@ std::size_t DiagonalMatrix<T>::size()
     return Data.size();
 }
 
-/* === Interplay of two classes ============================================= */
+template <typename T>
+DiagonalMatrix<T> DiagonalMatrix<T>::operator* (DiagonalMatrix<T> &M)
+{
+    assert(Data.size() == M.size());
+
+    auto newMatrix = la::DiagonalMatrix<T> (Data.size());
+
+    std::transform(
+        std::execution::par,
+        Data.begin(), Data.end(),
+        M.begin(), newMatrix.end(),
+        std::multiplies<>{}
+    );
+
+    return newMatrix;
+}
 
 template <typename T>
-std::vector<T> operator* (DiagonalMatrix<T> M, std::vector<T> v)
+std::vector<T> DiagonalMatrix<T>::operator* (std::vector<T> &v)
 {
-    assert(M.size() == v.size());
+    assert(Data.size() == v.size());
 
-    auto newVec = std::vector<T> (v.size());
+    auto newVec = std::vector<T> (Data.size());
 
     std::transform(
         std::execution::par,
         v.begin(), v.end(),
-        M.begin(), newVec.begin(),
+        Data.begin(), newVec.begin(),
         std::multiplies<>{}
     );
 
     return newVec;
+}
+
+template <typename T>
+void DiagonalMatrix<T>::invert()
+{
+    #pragma omp parallel for
+    for (auto& d : Data)
+        d = 1.0/d;
+}
+
+/* === Interplay of two classes ============================================= */
+
+template <typename T>
+DiagonalMatrix<T> operator* (Matrix<T> &M, DiagonalMatrix<T> &D)
+{
+    assert(M.rows() == D.size() && M.columns() == D.size());
 }
 
 } // namespace la
