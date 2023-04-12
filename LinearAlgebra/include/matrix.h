@@ -624,6 +624,63 @@ std::vector<T> Matrix<T>::operator* (std::vector<T> V)
     return newVec;
 }
 
+/* === Diagonal matrix class ================================================ */
+
+template <typename T>
+class DiagonalMatrix
+{
+public:
+    // constructors
+    DiagonalMatrix() = default;
+    DiagonalMatrix(std::size_t size);
+    DiagonalMatrix(std::vector<T> v);
+
+    // accessors and mutators
+    std::size_t size();
+    auto begin() { return Data.begin(); }
+    auto end()   { return Data.end(); }
+
+private:
+    std::vector<T> Data;
+};
+
+template <typename T>
+DiagonalMatrix<T>::DiagonalMatrix(std::size_t size)
+{
+    Data = std::vector<T> (size);
+}
+
+template <typename T>
+DiagonalMatrix<T>::DiagonalMatrix(std::vector<T> v)
+{
+    Data = v;
+}
+
+template <typename T>
+std::size_t DiagonalMatrix<T>::size()
+{
+    return Data.size();
+}
+
+/* === Interplay of two classes ============================================= */
+
+template <typename T>
+std::vector<T> operator* (DiagonalMatrix<T> M, std::vector<T> v)
+{
+    assert(M.size() == v.size());
+
+    auto newVec = std::vector<T> (v.size());
+
+    std::transform(
+        std::execution::par,
+        v.begin(), v.end(),
+        M.begin(), newVec.begin(),
+        std::multiplies<>{}
+    );
+
+    return newVec;
+}
+
 } // namespace la
 
 #endif // LA_MATRIX
