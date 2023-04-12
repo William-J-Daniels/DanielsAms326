@@ -33,6 +33,7 @@ add_subdirectory(Interpolation)
 # homeworks
 add_subdirectory(HomeworkOne)
 add_subdirectory(HomeworkTwo)
+add_subdirectory(HomeworkThree)
 
 # exams
 add_subdirectory(ExamOne)
