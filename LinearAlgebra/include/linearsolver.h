@@ -22,13 +22,22 @@ public:
     LinearSolver() = default;
     LinearSolver<T>(Matrix<T> init_A, std::vector<T> init_b);
 
+    void set_max_iter(unsigned new_max_iter) { max_iter = new_max_iter; }
+    void set_precision(double new_precision) { precision = new_precision; }
+
     std::vector<T> gaus_elim();
     std::vector<T> jacobi_iter(std::vector<T> InitGuess);
+    std::vector<T> gauss_seidel(std::vector<T> InitGuess);
+    std::vector<T> SOR(std::vector<T> InitGuess, T relaxation);
 
 private:
     Matrix<T> A;
     std::vector<T> b;
     std::vector<T> Solutions;
+
+    double precision = 1.0e-8;
+    unsigned num_iter = 0;
+    unsigned max_iter = std::numeric_limits<unsigned>::infinity();
 
     unsigned num_pivots = 0;
 
@@ -220,33 +229,72 @@ std::vector<T> LinearSolver<T>::jacobi_iter(std::vector<T> InitGuess)
     assert(A.numrows() == A.numcolumns());
     assert(InitGuess.size() == A.numrows());
 
-    // would be nice to know how to treat sparse matrices here
-    Matrix<T> D(A.numrows(), A.numcolumns());
-    Matrix<T> R(A.numrows(), A.numcolumns());
-    Matrix<T> B(A.numrows(), 1);
-    Matrix<T> X(A.numrows(), 1);
-    Matrix<T> lastX(A.numrows(), 1);
-    for (std::size_t row = 0; row < A.numrows(); row++)
-    {
-        for (std::size_t col = 0; col < A.numcolumns(); col++)
-        {
-            if (row == col)
-                D.set(row, col, 1.0/A(row, col));
-            else
-                R.set(row, col, A(row, col));
-        }
-        B.set(row, 0, b[row]);
-        X.set(row, 0, InitGuess[row]);
-    }
+    Solutions = InitGuess;
+    auto D = DiagonalMatrix<T> {A.diag()};
+    auto R = A - D;
+    D.invert();
 
+    // last_slns, temp, diffs;
+    std::vector<T> last_slns, temp, diffs (Solutions.size());
     do
     {
-        lastX = X;
-        X = R * X;
-        X = B - X;
-        X = D * X;
-        std::cout << X << std::endl;
-    } while (true);
+        temp = b - (R*Solutions);
+        Solutions = D * temp;
+        num_iter++;
+    } while (num_iter < max_iter); // add convergence later
+
+    return Solutions;
+}
+
+template <class T>
+std::vector<T> LinearSolver<T>::gauss_seidel(std::vector<T> InitGuess)
+{
+    // use element- based formula from
+    // https://en.wikipedia.org/wiki/Gauss%E2%80%93Seidel_method
+    assert(A.numrows() == A.numcolumns());
+    assert(InitGuess.size() == A.numrows());
+
+    Solutions = InitGuess;
+
+    do{
+        for (std::size_t i = 0; i < Solutions.size(); i++)
+        {
+            double sum = 0.0;
+            for (std::size_t j = 0; j < i; j++)
+                sum += A(i,j) * Solutions[j];
+            for (std::size_t j = i+1; j < Solutions.size(); j++)
+                sum += A(i,j) * Solutions[j];
+
+            Solutions[i] = 1.0 / A(i, i) * (b[i] - sum);
+        }
+        num_iter++;
+    } while (num_iter < max_iter);
+
+    return Solutions;
+}
+
+template <class T>
+std::vector<T> LinearSolver<T>::SOR(std::vector<T> InitGuess, T relaxation)
+{
+    assert(A.numrows() == A.numcolumns());
+    assert(InitGuess.size() == A.numrows());
+
+    Solutions = InitGuess;
+
+    do{
+        for (std::size_t i = 0; i < Solutions.size(); i++)
+        {
+            double sum = 0.0;
+            for (std::size_t j = 0; j < i; j++)
+                sum += A(i,j) * Solutions[j];
+            for (std::size_t j = i+1; j < Solutions.size(); j++)
+                sum += A(i,j) * Solutions[j];
+
+            Solutions[i] = (1.0 - relaxation) * Solutions[i] +
+            (relaxation / A(i, i) * (b[i] - sum));
+        }
+        num_iter++;
+    } while (num_iter < max_iter);
 
     return Solutions;
 }

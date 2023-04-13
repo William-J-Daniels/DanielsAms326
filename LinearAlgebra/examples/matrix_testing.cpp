@@ -10,4 +10,9 @@ int main()
     auto v = A.diag();
     for (auto& vee : v)
         std::cout << vee << " ";
+    std::cout << std::endl << std::endl;
+
+    auto D = la::DiagonalMatrix<double> {v};
+
+    std::cout << A - D;
 }

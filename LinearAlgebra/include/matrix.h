@@ -652,6 +652,7 @@ public:
 
     // accessors and mutators
     std::size_t size();
+    T operator() (std::size_t idx);
     auto begin() { return Data.begin(); }
     auto end()   { return Data.end(); }
 
@@ -668,6 +669,12 @@ template <typename T>
 DiagonalMatrix<T>::DiagonalMatrix(std::size_t size)
 {
     Data = std::vector<T> (size);
+}
+
+template <typename T>
+T DiagonalMatrix<T>::operator() (std::size_t idx)
+{
+    return Data[idx];
 }
 
 template <typename T>
@@ -729,7 +736,82 @@ void DiagonalMatrix<T>::invert()
 template <typename T>
 DiagonalMatrix<T> operator* (Matrix<T> &M, DiagonalMatrix<T> &D)
 {
-    assert(M.rows() == D.size() && M.columns() == D.size());
+    assert(M.numrows() == D.size() && M.numcolumns() == D.size());
+
+    auto tempVec = M.diag();
+    auto newDiag = DiagonalMatrix<T> {D*tempVec};
+
+    return newDiag;
+}
+template <typename T>
+DiagonalMatrix<T> operator* (DiagonalMatrix<T> &D, Matrix<T> &M)
+{
+    M * D;
+}
+
+template <typename T>
+Matrix<T> operator- (Matrix<T> M, DiagonalMatrix<T> &D)
+{
+    assert (M.numrows() == D.size() && M.numcolumns() == D.size());
+
+    for (std::size_t i = 0; i < M.numrows(); i++)
+    {
+        M.set(i, i, M(i, i)-D(i));
+    }
+
+    return M;
+}
+
+/* === Miscellaneous ======================================================== */
+
+// overloads on std::vector-- still assume column vector
+template <typename U>
+std::vector<U> operator- (std::vector<U> const &v)
+{
+    auto newVec = std::vector<U> (v.size());
+
+    std::transform(
+        std::execution::par,
+        v.begin(), v.end(),
+        v.begin(),
+        std::negate<>{}
+    );
+
+    return newVec;
+}
+
+template <typename U>
+std::vector<U> operator+ (std::vector<U> const &v1, std::vector<U> const &v2)
+{
+    assert(v1.size() == v2.size());
+
+    auto newVec = std::vector<U> (v1.size());
+
+    std::transform(
+        std::execution::par,
+        v1.begin(), v1.end(),
+        v2.begin(), newVec.begin(),
+        std::plus<>{}
+    );
+
+    return newVec;
+}
+
+template <typename U>
+std::vector<U> operator- (std::vector<U> const &v1, std::vector<U> const &v2)
+{
+    assert(v1.size() == v2.size());
+
+    auto newVec = std::vector<U> (v1.size());
+
+    std::transform(
+        std::execution::par,
+        v1.begin(), v1.end(),
+        v2.begin(), newVec.begin(),
+        std::minus<>{}
+    );
+
+    return newVec;
 }
 
 } // namespace la
