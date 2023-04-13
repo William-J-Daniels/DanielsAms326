@@ -260,10 +260,15 @@ std::vector<T> LinearSolver<T>::gauss_seidel(std::vector<T> InitGuess)
         for (std::size_t i = 0; i < Solutions.size(); i++)
         {
             double sum = 0.0;
-            for (std::size_t j = 0; j < i; j++)
-                sum += A(i,j) * Solutions[j];
-            for (std::size_t j = i+1; j < Solutions.size(); j++)
-                sum += A(i,j) * Solutions[j];
+            #pragma omp parallel reduction (+:sum)
+            {
+                #pragma omp for
+                for (std::size_t j = 0; j < i; j++)
+                    sum += A(i,j) * Solutions[j];
+                #pragma omp for
+                for (std::size_t j = i+1; j < Solutions.size(); j++)
+                    sum += A(i,j) * Solutions[j];
+            }
 
             Solutions[i] = 1.0 / A(i, i) * (b[i] - sum);
         }
@@ -285,10 +290,15 @@ std::vector<T> LinearSolver<T>::SOR(std::vector<T> InitGuess, T relaxation)
         for (std::size_t i = 0; i < Solutions.size(); i++)
         {
             double sum = 0.0;
-            for (std::size_t j = 0; j < i; j++)
-                sum += A(i,j) * Solutions[j];
-            for (std::size_t j = i+1; j < Solutions.size(); j++)
-                sum += A(i,j) * Solutions[j];
+            #pragma omp parallel reduction (+:sum)
+            {
+                #pragma omp for
+                for (std::size_t j = 0; j < i; j++)
+                    sum += A(i,j) * Solutions[j];
+                #pragma omp for
+                for (std::size_t j = i+1; j < Solutions.size(); j++)
+                    sum += A(i,j) * Solutions[j];
+            }
 
             Solutions[i] = (1.0 - relaxation) * Solutions[i] +
             (relaxation / A(i, i) * (b[i] - sum));

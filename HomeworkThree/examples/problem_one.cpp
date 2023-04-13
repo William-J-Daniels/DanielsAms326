@@ -16,7 +16,7 @@ int main()
                           {0,  0,  0,  0, -1,  0, -1,  4, -1},
                           {0,  0,  0,  0,  0, -1,  0, -1,  4}}};
     std::vector<double> b = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-    unsigned iter = 512;
+    unsigned iter = 64;
 
     // gaussiam elimination
     auto Solver = la::LinearSolver(A, b);
