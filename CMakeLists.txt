@@ -29,6 +29,7 @@ add_subdirectory(Differentiation)
 add_subdirectory(Integration)
 add_subdirectory(RootFinding)
 add_subdirectory(Interpolation)
+add_subdirectory(OrdinaryDifferentialEquations)
 
 # homeworks
 add_subdirectory(HomeworkOne)
