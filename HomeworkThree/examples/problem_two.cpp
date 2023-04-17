@@ -77,7 +77,13 @@ int main()
             }
         }
     }
+    std::cout << "Max overlap of " << max_overlap << " at theta = "
+              << max_state[0] << ", x = " << max_state[1] << ", y = "
+              << max_state[2] << std::endl;
 
+    auto heart = hw3::make_heart(NUM_X, max_state[1], max_state[2]);
+    auto quad  = hw3::make_quad(NUM_X, max_state[0]);
+    hw3::heart_csv(heart); hw3::quad_csv(quad);
 
     return 0;
 }
