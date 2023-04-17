@@ -9,8 +9,10 @@ target_link_libraries(Hw3P1 PUBLIC LinearAlgebra)
 
 add_library(${PROJECT_NAME} SHARED
   include/prob_two.h
+  include/improved_sort.h
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC TBB::tbb)
+target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
 
 target_include_directories(${PROJECT_NAME}
@@ -23,11 +25,13 @@ target_include_directories(${PROJECT_NAME}
 
 set(public_headers
   include/prob_two.h
+  include/improved_sort.h
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
 
 add_executable(Hw3P2 examples/problem_two.cpp)
 target_link_libraries(Hw3P2 PUBLIC ${PROJECT_NAME})
+target_link_libraries(Hw3P2 PUBLIC random_numbers)
 
 add_executable(Hw3P3 examples/problem_three.cpp)
 target_link_libraries(Hw3P3 PUBLIC OrdinaryDifferentialEquations)
