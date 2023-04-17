@@ -12,7 +12,7 @@ const double MIN_X = -1.0;
 const double MAX_X =  1.0;
 const double MIN_Y = -2.0;
 const double MAX_Y =  1.0;
-const unsigned NUM_TRANS = 1024;
+const unsigned NUM_TRANS = 64;
 
 
 int main()
@@ -71,7 +71,7 @@ int main()
                 {
                     max_overlap = overlap;
                     max_state = {t, x, y};
-                    std::cout << "New max!";
+                    std::cout << " New max!";
                 }
                 std::cout << std::endl;
             }
