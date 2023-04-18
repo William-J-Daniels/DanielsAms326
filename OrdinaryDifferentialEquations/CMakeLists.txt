@@ -7,6 +7,8 @@ project(OrdinaryDifferentialEquations VERSION 1.0.0)
 add_library(${PROJECT_NAME} SHARED
   include/odesolver.h
   src/odesolver.cpp
+  include/explicitodesolver.h
+  src/explicitodesolver.cpp
   include/euler.h
   src/euler.cpp
   include/eulercromer.h
@@ -15,7 +17,10 @@ add_library(${PROJECT_NAME} SHARED
   src/midpoint.cpp
   include/huen.h
   src/huen.cpp
+  include/implicitodesolver.h
+  src/implicitodesolver.cpp
 )
+target_link_libraries(${PROJECT_NAME} PUBLIC root_finding)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -27,9 +32,14 @@ target_include_directories(${PROJECT_NAME}
 
 set(public_headers
   include/odesolver.h
+  include/explicitodesolver.h
   include/euler.h
   include/eulercromer.h
   include/midpoint.h
   include/huen.h
+  include/implicitodesolver.h
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
+
+add_executable(IOdeTest examples/implicit_solver_testing.cpp)
+target_link_libraries(IOdeTest PUBLIC ${PROJECT_NAME})

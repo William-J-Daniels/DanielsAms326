@@ -1,18 +1,13 @@
-#ifndef ODE_SOLVER_H
-#define ODE_SOLVER_H
+#ifndef ODESOLVER_H
+#define ODESOLVER_H
 
 #include <functional>
 #include <cassert>
-
-namespace ode {
 
 class Solver
 {
 public:
     Solver() = default;
-    Solver(std::function<double(double)> init_DiffEq,
-           double init_x, double init_y,
-           double init_step);
     virtual ~Solver(){ }
 
     virtual double advance(double step) = 0;
@@ -23,10 +18,7 @@ public:
     void set_state(double new_x, double new_y);
 
 protected:
-    std::function<double(double)> DiffEq;
     double x, y, step_size;
 };
 
-}
-
-#endif // ODE_SOLVER_H
+#endif // ODESOLVER_H

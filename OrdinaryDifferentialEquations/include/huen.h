@@ -1,15 +1,15 @@
 #ifndef ODE_HUEN_H
 #define ODE_HUEN_H
 
-#include <odesolver.h>
+#include <explicitodesolver.h>
 #include <euler.h>
 
 namespace ode {
 
-class Huen : public Solver
+class Huen : public ExplicitSolver
 {
 public:
-    using Solver::Solver;
+    using ExplicitSolver::ExplicitSolver;
 
     double advance(double step) override;
 

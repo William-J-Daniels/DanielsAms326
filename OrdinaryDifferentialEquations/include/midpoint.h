@@ -1,14 +1,14 @@
 #ifndef ODE_MIDPOINT_H
 #define ODE_MIDPOINT_H
 
-#include <odesolver.h>
+#include <explicitodesolver.h>
 
 namespace ode {
 
-class Midpoint : public Solver
+class Midpoint : public ExplicitSolver
 {
 public:
-    using Solver::Solver;
+    using ExplicitSolver::ExplicitSolver;
 
     double advance(double step) override;
 

@@ -1,14 +1,14 @@
 #ifndef ODE_EULER_H
 #define ODE_EULER_H
 
-#include <odesolver.h>
+#include <explicitodesolver.h>
 
 namespace ode {
 
-class Euler : public Solver
+class Euler : public ExplicitSolver
 {
 public:
-    using Solver::Solver;
+    using ExplicitSolver::ExplicitSolver;
 
     double advance(double step) override;
 
