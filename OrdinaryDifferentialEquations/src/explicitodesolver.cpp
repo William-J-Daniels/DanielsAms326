@@ -8,7 +8,7 @@ ExplicitSolver::ExplicitSolver(std::function<double(double)> init_DiffEq,
 {
     assert(init_step != 0.0);
 
-    DiffEq    = init_DiffEq;
+    DiffEq = init_DiffEq;
     x = init_x;
     y = init_y;
     step_size = init_step;
