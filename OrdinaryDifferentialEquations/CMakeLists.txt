@@ -21,6 +21,8 @@ add_library(${PROJECT_NAME} SHARED
   src/implicitodesolver.cpp
   include/ieuler.h
   src/ieuler.cpp
+  include/ieulercromer.h
+  src/ieulercromer.cpp
 )
 target_link_libraries(${PROJECT_NAME} PUBLIC root_finding)
 
@@ -41,6 +43,7 @@ set(public_headers
   include/huen.h
   include/implicitodesolver.h
   include/ieuler.h
+  include/ieulercromer.h
 )
 set_target_properties(${PROJECT_NAME} PROPERTIES PUBLIC_HEADER "${public_headers}")
 
