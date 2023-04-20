@@ -1,5 +1,8 @@
 // my libraries
 #include <euler.h>
+#include <eulercromer.h>
+#include <midpoint.h>
+#include <huen.h>
 
 // cpp standard libraries
 #include <vector>
@@ -40,7 +43,7 @@ int main()
             return (v0 / vb) * (1.0 - ((x*x)/(a*a))) / std::cos(betas[i]) +
                    std::tan(betas[i]);
         };
-        auto Int = ode::Euler(DE, -a, 0, STEP);
+        auto Int = ode::Midpoint(DE, -a, 0, STEP);
         while (Int.get_x() < a)
         {
             auto prev_y = Int.get_y();
@@ -56,7 +59,7 @@ int main()
     auto min = std::min_element(
         std::execution::par, results.begin(), results.end()
     );
-    auto min_idx = std::distance(min, results.begin());
+    auto min_idx = std::distance(results.begin(), min);
 
     // create list for a plot
     std::list<std::array<double, 2>> plot;
@@ -65,7 +68,7 @@ int main()
         return (v0 / vb) * (1.0 - ((x*x)/(a*a))) / std::cos(betas[min_idx]) +
                std::tan(betas[min_idx]);
     };
-    auto Int = ode::Euler(DE, -a, 0, STEP);
+    auto Int = ode::Midpoint(DE, -a, 0, STEP);
     while (Int.get_x() < a)
     {
         Int.advance(STEP);
