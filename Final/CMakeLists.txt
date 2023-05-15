@@ -9,3 +9,6 @@ target_link_libraries(F1 PUBLIC random_numbers)
 target_link_libraries(F1 PUBLIC OpenMP::OpenMP_CXX)
 
 add_executable(F2 examples/prob_two.cpp)
+
+add_executable(F3 examples/prob_three.cpp)
+target_link_libraries(F3 PUBLIC OrdinaryDifferentialEquations)
