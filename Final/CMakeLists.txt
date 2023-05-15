@@ -7,3 +7,5 @@ project(ExamOne VERSION 1.0.0)
 add_executable(F1 examples/prob_one.cpp)
 target_link_libraries(F1 PUBLIC random_numbers)
 target_link_libraries(F1 PUBLIC OpenMP::OpenMP_CXX)
+
+add_executable(F2 examples/prob_two.cpp)

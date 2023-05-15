@@ -44,10 +44,10 @@ int main()
             };
 
             // check if the needle is in bounds by computing the extreames of
-            // its position
-            if (std::abs(position[0] + 0.5*L*std::cos(position[2])) < ds[i] && // x
+            // its position and comparing to grid size
+            if (std::abs(position[0] + 0.5*L*std::cos(position[2])) < ds[i] &&
                 std::abs(position[0] - 0.5*L*std::cos(position[2])) < ds[i] &&
-                std::abs(position[1] + 0.5*L*std::sin(position[2])) < ds[i] && // y
+                std::abs(position[1] + 0.5*L*std::sin(position[2])) < ds[i] &&
                 std::abs(position[1] - 0.5*L*std::sin(position[2])) < ds[i])
                 clear[i]++;
         }
