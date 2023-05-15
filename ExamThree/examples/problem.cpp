@@ -16,9 +16,9 @@
 
 // constants
 const unsigned RES = 1024; // resolution of search grid
-const double MIN_ANG = -1.4; // angle search space
-const double MAX_ANG =  1.4;
-const double STEP = 1.0e-4; // set size in miles
+const double MIN_ANG = -1.0; // angle search space
+const double MAX_ANG =  0.0;
+const double STEP = 1.0e-6; // set size in miles
 // easier to read than magic numbers
 const double a = 8.0;
 const double v0 = 20.0, vb = 30.0;
@@ -59,6 +59,7 @@ int main()
     auto min = std::min_element(
         std::execution::par, results.begin(), results.end()
     );
+    // auto min_idx = std::distance(min, results.begin());
     auto min_idx = std::distance(results.begin(), min);
 
     // create list for a plot
